@@ -7,11 +7,12 @@
 package orderAPI
 
 import (
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -253,7 +254,7 @@ var File_Protobuf_proto_order_service_OrderService_proto protoreflect.FileDescri
 
 const file_Protobuf_proto_order_service_OrderService_proto_rawDesc = "" +
 	"\n" +
-	"/Protobuf/proto/order_service/OrderService.proto\x12\borderAPI\"<\n" +
+	"/Protobuf/proto/order_service/OrderService.proto\x12\vorderAPI.v2\"<\n" +
 	"\x06GetReq\x12\x19\n" +
 	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\",\n" +
@@ -269,10 +270,11 @@ const file_Protobuf_proto_order_service_OrderService_proto_rawDesc = "" +
 	"\n" +
 	"CreateResp\x12\x19\n" +
 	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status2\x7f\n" +
-	"\fOrderService\x125\n" +
-	"\x0eGetOrderStatus\x12\x10.orderAPI.GetReq\x1a\x11.orderAPI.GetResp\x128\n" +
-	"\vCreateOrder\x12\x13.orderAPI.CreateReq\x1a\x14.orderAPI.CreateRespB\x1fZ\x1d./Protobuf/gen/order;orderAPIb\x06proto3"
+	"\x06status\x18\x02 \x01(\tR\x06status2\xcd\x01\n" +
+	"\fOrderService\x12;\n" +
+	"\x0eGetOrderStatus\x12\x13.orderAPI.v2.GetReq\x1a\x14.orderAPI.v2.GetResp\x12>\n" +
+	"\vCreateOrder\x12\x16.orderAPI.v2.CreateReq\x1a\x17.orderAPI.v2.CreateResp\x12@\n" +
+	"\x11StreamOrderUpdate\x12\x13.orderAPI.v2.GetReq\x1a\x14.orderAPI.v2.GetResp0\x01B\x1fZ\x1d./Protobuf/gen/order;orderAPIb\x06proto3"
 
 var (
 	file_Protobuf_proto_order_service_OrderService_proto_rawDescOnce sync.Once
@@ -288,18 +290,20 @@ func file_Protobuf_proto_order_service_OrderService_proto_rawDescGZIP() []byte {
 
 var file_Protobuf_proto_order_service_OrderService_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_Protobuf_proto_order_service_OrderService_proto_goTypes = []any{
-	(*GetReq)(nil),     // 0: orderAPI.GetReq
-	(*GetResp)(nil),    // 1: orderAPI.GetResp
-	(*CreateReq)(nil),  // 2: orderAPI.CreateReq
-	(*CreateResp)(nil), // 3: orderAPI.CreateResp
+	(*GetReq)(nil),     // 0: orderAPI.v2.GetReq
+	(*GetResp)(nil),    // 1: orderAPI.v2.GetResp
+	(*CreateReq)(nil),  // 2: orderAPI.v2.CreateReq
+	(*CreateResp)(nil), // 3: orderAPI.v2.CreateResp
 }
 var file_Protobuf_proto_order_service_OrderService_proto_depIdxs = []int32{
-	0, // 0: orderAPI.OrderService.GetOrderStatus:input_type -> orderAPI.GetReq
-	2, // 1: orderAPI.OrderService.CreateOrder:input_type -> orderAPI.CreateReq
-	1, // 2: orderAPI.OrderService.GetOrderStatus:output_type -> orderAPI.GetResp
-	3, // 3: orderAPI.OrderService.CreateOrder:output_type -> orderAPI.CreateResp
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
+	0, // 0: orderAPI.v2.OrderService.GetOrderStatus:input_type -> orderAPI.v2.GetReq
+	2, // 1: orderAPI.v2.OrderService.CreateOrder:input_type -> orderAPI.v2.CreateReq
+	0, // 2: orderAPI.v2.OrderService.StreamOrderUpdate:input_type -> orderAPI.v2.GetReq
+	1, // 3: orderAPI.v2.OrderService.GetOrderStatus:output_type -> orderAPI.v2.GetResp
+	3, // 4: orderAPI.v2.OrderService.CreateOrder:output_type -> orderAPI.v2.CreateResp
+	1, // 5: orderAPI.v2.OrderService.StreamOrderUpdate:output_type -> orderAPI.v2.GetResp
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name

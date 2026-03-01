@@ -5,6 +5,7 @@ import (
 	orderAPI "Academy/gRPCServices/Protobuf/gen/order"
 	"fmt"
 
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 )
 
@@ -22,7 +23,10 @@ func NewClient() (*Client, error) {
 	port := cfg.Server.Port
 	dsn := fmt.Sprintf("%s:%d", host, port)
 
-	conn, err := grpc.NewClient(dsn, grpc.WithInsecure())
+	conn, err := grpc.NewClient(dsn,
+		grpc.WithInsecure(),
+		grpc.WithBlock(),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()))
 	if err != nil {
 		return nil, err
 	}

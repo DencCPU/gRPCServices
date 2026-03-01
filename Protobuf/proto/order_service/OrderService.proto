@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package orderAPI;
+package orderAPI.v2;
 
 option go_package = "./Protobuf/gen/order;orderAPI";
 
@@ -10,6 +10,7 @@ option go_package = "./Protobuf/gen/order;orderAPI";
 service OrderService{
 rpc GetOrderStatus(GetReq)returns(GetResp); //Получение информации о заказе
 rpc CreateOrder(CreateReq)returns(CreateResp); //Создание заказа
+rpc StreamOrderUpdate(GetReq)returns(stream GetResp); //Получение актульного статуса заказа
 }
 
 

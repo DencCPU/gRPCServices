@@ -61,6 +61,5 @@ func (p *PostgresDB) AddOrderStorage(ctx context.Context, newOrder order.Order, 
 		return "", "", err
 	}
 
-	p.ControlOrder(newOrder.Order_type, newOrder.User_id, orderID)
 	return orderID, order_status, nil
 }

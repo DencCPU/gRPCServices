@@ -7,10 +7,12 @@ import (
 	"time"
 )
 
-func (p *PostgresDB) ControlOrder(orderType string, user_id int64, orderID string) {
+func (p *PostgresDB) ControlOrder(orderType string, user_id int64, orderID string) chan string {
 	var wg sync.WaitGroup
+	stateCh := make(chan string, 1)
 	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		var id int
 		var status string
 
@@ -27,7 +29,6 @@ func (p *PostgresDB) ControlOrder(orderType string, user_id int64, orderID strin
 			return
 		}
 
-		defer wg.Done()
 		switch orderType {
 
 		case "normal":
@@ -38,6 +39,7 @@ func (p *PostgresDB) ControlOrder(orderType string, user_id int64, orderID strin
 				fmt.Println("ошибка обработки заказа:", err)
 				return
 			}
+			stateCh <- status
 			time.Sleep(5 * time.Second)
 			status = "completed"
 			err = p.UpdateStatus(id, status)
@@ -45,6 +47,7 @@ func (p *PostgresDB) ControlOrder(orderType string, user_id int64, orderID strin
 				fmt.Println("ошибка обработки заказа:", err)
 				return
 			}
+			stateCh <- status
 
 		case "express":
 			time.Sleep(2 * time.Second)
@@ -54,6 +57,7 @@ func (p *PostgresDB) ControlOrder(orderType string, user_id int64, orderID strin
 				fmt.Println("ошибка обработки заказа:", err)
 				return
 			}
+			stateCh <- status
 
 			time.Sleep(2 * time.Second)
 			status = "completed"
@@ -62,10 +66,12 @@ func (p *PostgresDB) ControlOrder(orderType string, user_id int64, orderID strin
 				fmt.Println("ошибка обработки заказа:", err)
 				return
 			}
+			stateCh <- status
 		}
 	}()
 	go func() {
 		wg.Wait()
+		close(stateCh)
 	}()
-
+	return stateCh
 }

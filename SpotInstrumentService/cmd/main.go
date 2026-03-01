@@ -5,6 +5,8 @@ import (
 	"Academy/gRPCServices/SpotInstrumentService/internal/adapters/memory"
 	redisadapter "Academy/gRPCServices/SpotInstrumentService/internal/adapters/redis"
 	spothandlers "Academy/gRPCServices/SpotInstrumentService/internal/controllers/grpc_handlers"
+
+	"Academy/gRPCServices/SpotInstrumentService/pkg/opentelimetry"
 	grpcserver "Academy/gRPCServices/SpotInstrumentService/pkg/spotserver"
 	"context"
 	"time"
@@ -51,6 +53,13 @@ func main() {
 	if err != nil {
 		log.Fatal("ошибка инициализации redis:", err)
 	}
+
+	//Инициализация трейсера
+	tp, err := opentelimetry.NewTrace(context.Background(), "spotService")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer tp.Shutdown(context.Background())
 
 	//Инициализация нового grpc сервера
 	grpcServer, err := grpcserver.New(redis)

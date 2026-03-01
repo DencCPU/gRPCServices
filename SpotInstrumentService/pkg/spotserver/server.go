@@ -7,6 +7,7 @@ import (
 	"net"
 	"time"
 
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 )
 
@@ -34,13 +35,15 @@ func New(redis *redisadapter.RedisDB) (*Server, error) {
 	}
 
 	//Регистрация интерсепторов на сервере
-	interseptors := grpc.ChainUnaryInterceptor(
-		interseptors.UnaryPanicRecoveryInterceptor,                //Обработка паник
-		interseptors.XRequestID,                                   //Формирование ID запроса
-		interseptors.LoggerInterseptor,                            //Логирование заросов
-		interseptors.RedisCacheInterceptor(redis, 10*time.Minute), //Сохранение запросов в кэш
+	newServer := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			interseptors.UnaryPanicRecoveryInterceptor,
+			interseptors.XRequestID,
+			interseptors.LoggerInterseptor,
+			interseptors.RedisCacheInterceptor(redis, 10*time.Minute),
+		),
+		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 	)
-	newServer := grpc.NewServer(interseptors)
 
 	return &Server{newServer, lis}, nil
 }

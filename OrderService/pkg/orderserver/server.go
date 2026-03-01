@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 )
 
@@ -29,11 +30,12 @@ func New() (*Server, error) {
 		return nil, err
 	}
 
-	interseptors := grpc.ChainUnaryInterceptor(
-		interseptors.UnaryPanicRecoveryInterceptor,
-		interseptors.XRequestID,
-		interseptors.LoggerInterseptor,
-	)
-	newServer := grpc.NewServer(interseptors)
+	newServer := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			interseptors.UnaryPanicRecoveryInterceptor,
+			interseptors.XRequestID,
+			interseptors.LoggerInterseptor,
+		), grpc.StatsHandler(otelgrpc.NewServerHandler()))
+
 	return &Server{newServer, lis}, nil
 }

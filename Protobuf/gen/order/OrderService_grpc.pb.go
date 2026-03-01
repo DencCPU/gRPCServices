@@ -8,6 +8,7 @@ package orderAPI
 
 import (
 	context "context"
+
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -19,8 +20,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	OrderService_GetOrderStatus_FullMethodName = "/orderAPI.OrderService/GetOrderStatus"
-	OrderService_CreateOrder_FullMethodName    = "/orderAPI.OrderService/CreateOrder"
+	OrderService_GetOrderStatus_FullMethodName    = "/orderAPI.v2.OrderService/GetOrderStatus"
+	OrderService_CreateOrder_FullMethodName       = "/orderAPI.v2.OrderService/CreateOrder"
+	OrderService_StreamOrderUpdate_FullMethodName = "/orderAPI.v2.OrderService/StreamOrderUpdate"
 )
 
 // OrderServiceClient is the client API for OrderService service.
@@ -31,6 +33,7 @@ const (
 type OrderServiceClient interface {
 	GetOrderStatus(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetResp, error)
 	CreateOrder(ctx context.Context, in *CreateReq, opts ...grpc.CallOption) (*CreateResp, error)
+	StreamOrderUpdate(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetResp], error)
 }
 
 type orderServiceClient struct {
@@ -61,6 +64,25 @@ func (c *orderServiceClient) CreateOrder(ctx context.Context, in *CreateReq, opt
 	return out, nil
 }
 
+func (c *orderServiceClient) StreamOrderUpdate(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetResp], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &OrderService_ServiceDesc.Streams[0], OrderService_StreamOrderUpdate_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[GetReq, GetResp]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type OrderService_StreamOrderUpdateClient = grpc.ServerStreamingClient[GetResp]
+
 // OrderServiceServer is the server API for OrderService service.
 // All implementations must embed UnimplementedOrderServiceServer
 // for forward compatibility.
@@ -69,6 +91,7 @@ func (c *orderServiceClient) CreateOrder(ctx context.Context, in *CreateReq, opt
 type OrderServiceServer interface {
 	GetOrderStatus(context.Context, *GetReq) (*GetResp, error)
 	CreateOrder(context.Context, *CreateReq) (*CreateResp, error)
+	StreamOrderUpdate(*GetReq, grpc.ServerStreamingServer[GetResp]) error
 	mustEmbedUnimplementedOrderServiceServer()
 }
 
@@ -84,6 +107,9 @@ func (UnimplementedOrderServiceServer) GetOrderStatus(context.Context, *GetReq) 
 }
 func (UnimplementedOrderServiceServer) CreateOrder(context.Context, *CreateReq) (*CreateResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateOrder not implemented")
+}
+func (UnimplementedOrderServiceServer) StreamOrderUpdate(*GetReq, grpc.ServerStreamingServer[GetResp]) error {
+	return status.Errorf(codes.Unimplemented, "method StreamOrderUpdate not implemented")
 }
 func (UnimplementedOrderServiceServer) mustEmbedUnimplementedOrderServiceServer() {}
 func (UnimplementedOrderServiceServer) testEmbeddedByValue()                      {}
@@ -142,11 +168,22 @@ func _OrderService_CreateOrder_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OrderService_StreamOrderUpdate_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetReq)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(OrderServiceServer).StreamOrderUpdate(m, &grpc.GenericServerStream[GetReq, GetResp]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type OrderService_StreamOrderUpdateServer = grpc.ServerStreamingServer[GetResp]
+
 // OrderService_ServiceDesc is the grpc.ServiceDesc for OrderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var OrderService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "orderAPI.OrderService",
+	ServiceName: "orderAPI.v2.OrderService",
 	HandlerType: (*OrderServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -158,6 +195,12 @@ var OrderService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _OrderService_CreateOrder_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "StreamOrderUpdate",
+			Handler:       _OrderService_StreamOrderUpdate_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "Protobuf/proto/order_service/OrderService.proto",
 }

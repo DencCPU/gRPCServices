@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS orders(
     user_id  INT REFERENCES users(id),
     market_id INT REFERENCES markets(id),
     order_type TEXT NOT NULL,
-    price NUMERIC(10,2) NOT NULL,
+    price NUMERIC(10,8) NOT NULL,
     quantity INT NOT NULL,
     status TEXT NOT NULL,
     order_id INT REFERENCES orders_id(id),

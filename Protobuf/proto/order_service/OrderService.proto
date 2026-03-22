@@ -27,9 +27,9 @@ message GetResp{
 
 //Запрос для CreateOrder
 message CreateReq{
-int64 user_id  = 1; //Идентификатор пользователя
+int64 user_id  = 1; //Идентификатор пользователя (заменить на uuid)
 int64 market_id = 2; // Индентифиактор маркетплейса
-string order_type = 3; //Тип заказа(Стандарт,экспрес,ко времени)
+string order_type = 3; //Тип заказа(Стандарт,экспрес,по времени)
 string price = 4; //Цена
 int64 quantity = 5; //Количество
 }
@@ -39,3 +39,6 @@ message CreateResp{
     string order_id = 1; //Идентификатор заказа
     string status = 2;//Статус заказа
 }
+
+//message для StreamOrderUpdate с времененем обновления статуса
+//time.Stamp

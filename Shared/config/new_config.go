@@ -49,6 +49,7 @@ func NewConfig[T any](loader *ConfigLoader) (*T, error) {
 
 	//Использование переменных окружения и получения пути к env файлу сервиса
 	globalViper.AutomaticEnv()
+
 	pathLocalEnv := globalViper.GetString(loader.PathToLocalEnv)
 	// fmt.Println(pathLocalEnv)
 

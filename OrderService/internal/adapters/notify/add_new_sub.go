@@ -4,7 +4,7 @@ import "Academy/gRPCServices/OrderService/internal/domain/order"
 
 // Добавление нового подписчика для получения актуального статуса
 func (s *StatusStorage) AddNewSub(key order.Key) chan string {
-	ch := make(chan string, 1) // буфер 1, чтобы генератор не блокировался
+	ch := make(chan string, 10) // буфер 1, чтобы генератор не блокировался
 	s.mu.Lock()
 	s.Subs[key] = append(s.Subs[key], ch)
 	s.mu.Unlock()

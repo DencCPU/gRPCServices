@@ -1,7 +1,7 @@
 package spothandlers
 
 import (
-	spotAPI "Academy/gRPCServices/Protobuf/gen/spot"
+	spot "Academy/gRPCServices/Protobuf/gen/spot_service"
 	viewdto "Academy/gRPCServices/SpotInstrumentService/internal/adapters/dto"
 	domainusers "Academy/gRPCServices/SpotInstrumentService/internal/domain/users"
 	"Academy/gRPCServices/SpotInstrumentService/internal/usecase"
@@ -13,7 +13,7 @@ type Service interface {
 }
 
 type Handlers struct {
-	spotAPI.UnimplementedSpotInstrumentServiceServer
+	spot.UnimplementedSpotInstrumentServiceServer
 	Service Service //Функционал обработчиков
 }
 

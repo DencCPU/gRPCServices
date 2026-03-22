@@ -15,6 +15,7 @@ type Client struct {
 	orderAPI.OrderServiceClient
 }
 
+// УБРАТЬ В ОТДЕЛЬНЮ ПАПКУ
 const (
 	globalPathToEnv = "."    //Дериктория, в которой находиться общий файл env
 	envFile         = ".env" //Название файла .env

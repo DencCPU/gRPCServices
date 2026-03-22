@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package spotAPI;
+package spotAPI.v2; 
 
-option go_package = "./Protobuf/gen/spot;spotAPI";
+option go_package = "github.com/Dens-CPU/gRPCServices/Protobuf/gen/spot_service;spot";
 
 //Предоставления данных о рынках
 service SpotInstrumentService {
@@ -11,13 +11,13 @@ service SpotInstrumentService {
 
 //Запрос для ViewMarket
 message ViewReq{
-    User_Roles user_roles = 1; //Поле для юзера
+    UserRoles user_roles = 1; //Поле для юзера
 }
 
-enum User_Roles{
+enum UserRoles{
     ROLE_UNSPECIFIED = 0;
-    ROLE_USER = 1;
-    ROLE_ADMIN = 2;
+    ROLE_BASIC_USER = 1;
+    ROLE_PREMIUM_USER = 2;
 }
 
 //Ответ для ViewMarket

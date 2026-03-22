@@ -8,6 +8,7 @@ import (
 
 // Получение статуса заказа в стриминге
 func (o *OrderService) StreamGetState(ctx context.Context, key order.Key) chan string {
+
 	//Добавление новой подписки для получения статусов
 	stateCh := o.Notify.AddNewSub(key)
 	fmt.Println("Подписан новый клиент")

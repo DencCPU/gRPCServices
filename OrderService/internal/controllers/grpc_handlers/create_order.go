@@ -10,7 +10,7 @@ import (
 )
 
 func (h *Handlers) CreateOrder(ctx context.Context, req *orderAPI.CreateReq) (*orderAPI.CreateResp, error) {
-	//Добавить валидацию запроса
+
 	price, err := decimal.NewFromString(req.Price)
 	if err != nil {
 		return nil, fmt.Errorf("Неправильно указанная суммма:%w", err)

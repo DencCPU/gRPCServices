@@ -1,8 +1,8 @@
 package order
 
 type OrderInfo struct {
-	User_id    int64
-	Market_id  int64
+	User_id    string
+	Market_id  string
 	Order_type string
 	Price      string
 	Quantity   int64

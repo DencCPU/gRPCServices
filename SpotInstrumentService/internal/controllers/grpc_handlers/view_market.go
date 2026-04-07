@@ -17,6 +17,7 @@ func (h *Handlers) ViewMarket(ctx context.Context, req *spot.ViewReq) (*spot.Vie
 
 	//Преобразование запроса в доменную структуру User
 	user := domainusers.NewUser(domainusers.UserType(req.UserRoles))
+
 	//Запрос сервиса на получение доступных рынков
 	output, err := h.Service.ViewMarket(ctx, user)
 	if err != nil {

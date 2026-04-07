@@ -15,12 +15,12 @@ func (o *OrderService) CreateOrder(ctx context.Context, newOrder orderdomain.Ord
 
 	markets, err := o.GetEnableMarkets(ctx)
 	if err != nil {
-		o.logger.Error("ошибка получения доступныхх рынков:",
+		o.logger.Error("Error getting available markets:",
 			zap.Error(err),
 		)
 		return "", "", err
 	}
-	o.logger.Info("Получен список доступных рынков",
+	o.logger.Info("Received a list of available markets",
 		zap.String("get enable markets span ID:", span.SpanContext().TraceID().String()),
 	)
 
@@ -31,13 +31,13 @@ func (o *OrderService) CreateOrder(ctx context.Context, newOrder orderdomain.Ord
 	if err != nil {
 		return "", "", err
 	}
-	o.logger.Info("Создан заказ:",
+	o.logger.Info("Order created:",
 		zap.String("OrderID:", orderID),
 		zap.String("add order span ID:", span.SpanContext().TraceID().String()),
 	)
 
 	//Выполнение заказа
-	fmt.Println("Запущено выполнение заказа")
+	fmt.Println("The order has been processed")
 	stateCh := o.ControlOrder(newOrder.Order_type, newOrder.User_id, orderID)
 
 	go o.Notify.AddNewState(newOrder.User_id, orderID, stateCh)

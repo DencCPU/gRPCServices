@@ -1,7 +1,6 @@
 package orderhandlers
 
 import (
-	"fmt"
 	"time"
 
 	orderdomain "github.com/DencCPU/gRPCServices/OrderService/internal/domain/order"
@@ -27,7 +26,6 @@ func (h *Handlers) StreamOrderUpdate(req *order.StreamOrderUpdateReq, stream ord
 				return nil
 			}
 			update_time := timestamppb.New(time.Now())
-			fmt.Println(status)
 			stream.Send(&order.StreamOrderUpdateResp{OrderStatus: status, UpdateStatusTime: update_time})
 		case <-stream.Context().Done():
 			return nil

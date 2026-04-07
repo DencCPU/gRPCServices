@@ -20,18 +20,13 @@ func LoggerInterseptor(logger *zap.Logger) grpc.UnaryServerInterceptor {
 		requestID, _ := ctx.Value(requestIDKey).(string)
 
 		//Логирование входящего запроса
-		logger.Info("Запрос сервиса",
-			zap.String("Номер запроса", requestID),
-			zap.String("Вызываемый метод", info.FullMethod),
+		logger.Info("Service request",
+			zap.String("Request number", requestID),
+			zap.String("Called method", info.FullMethod),
 		)
 
 		//Вызов следующего обработчика
 		resp, err := handler(ctx, req)
-		if err != nil {
-			logger.Error("Ошибка выполнения запроса",
-				zap.Error(err),
-			)
-		}
 		return resp, err
 	}
 }

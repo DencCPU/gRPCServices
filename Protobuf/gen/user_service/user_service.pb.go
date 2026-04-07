@@ -10,7 +10,7 @@ import (
 	_ "github.com/envoyproxy/protoc-gen-validate/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	durationpb "google.golang.org/protobuf/types/known/durationpb"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -142,9 +142,9 @@ func (x *CreateUserReq) GetUserRole() UserRole {
 
 type CreateUserResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	AccsessToken  string                 `protobuf:"bytes,1,opt,name=accsess_token,json=accsessToken,proto3" json:"accsess_token,omitempty"`
+	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
 	RefreshToken  string                 `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
-	ExpireAt      *durationpb.Duration   `protobuf:"bytes,3,opt,name=expire_at,json=expireAt,proto3" json:"expire_at,omitempty"`
+	ExpireAt      *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=expire_at,json=expireAt,proto3" json:"expire_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -179,9 +179,9 @@ func (*CreateUserResp) Descriptor() ([]byte, []int) {
 	return file_user_service_user_service_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *CreateUserResp) GetAccsessToken() string {
+func (x *CreateUserResp) GetAccessToken() string {
 	if x != nil {
-		return x.AccsessToken
+		return x.AccessToken
 	}
 	return ""
 }
@@ -193,34 +193,256 @@ func (x *CreateUserResp) GetRefreshToken() string {
 	return ""
 }
 
-func (x *CreateUserResp) GetExpireAt() *durationpb.Duration {
+func (x *CreateUserResp) GetExpireAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.ExpireAt
 	}
 	return nil
 }
 
+type UpdateTokensReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	RefreshToken  string                 `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateTokensReq) Reset() {
+	*x = UpdateTokensReq{}
+	mi := &file_user_service_user_service_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateTokensReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateTokensReq) ProtoMessage() {}
+
+func (x *UpdateTokensReq) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_user_service_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateTokensReq.ProtoReflect.Descriptor instead.
+func (*UpdateTokensReq) Descriptor() ([]byte, []int) {
+	return file_user_service_user_service_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *UpdateTokensReq) GetAccessToken() string {
+	if x != nil {
+		return x.AccessToken
+	}
+	return ""
+}
+
+func (x *UpdateTokensReq) GetRefreshToken() string {
+	if x != nil {
+		return x.RefreshToken
+	}
+	return ""
+}
+
+type UpdateTokensResp struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	RefreshToken  string                 `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
+	ExpireAt      *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=expire_at,json=expireAt,proto3" json:"expire_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateTokensResp) Reset() {
+	*x = UpdateTokensResp{}
+	mi := &file_user_service_user_service_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateTokensResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateTokensResp) ProtoMessage() {}
+
+func (x *UpdateTokensResp) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_user_service_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateTokensResp.ProtoReflect.Descriptor instead.
+func (*UpdateTokensResp) Descriptor() ([]byte, []int) {
+	return file_user_service_user_service_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *UpdateTokensResp) GetAccessToken() string {
+	if x != nil {
+		return x.AccessToken
+	}
+	return ""
+}
+
+func (x *UpdateTokensResp) GetRefreshToken() string {
+	if x != nil {
+		return x.RefreshToken
+	}
+	return ""
+}
+
+func (x *UpdateTokensResp) GetExpireAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ExpireAt
+	}
+	return nil
+}
+
+type ValidationReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ValidationReq) Reset() {
+	*x = ValidationReq{}
+	mi := &file_user_service_user_service_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ValidationReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ValidationReq) ProtoMessage() {}
+
+func (x *ValidationReq) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_user_service_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ValidationReq.ProtoReflect.Descriptor instead.
+func (*ValidationReq) Descriptor() ([]byte, []int) {
+	return file_user_service_user_service_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ValidationReq) GetAccessToken() string {
+	if x != nil {
+		return x.AccessToken
+	}
+	return ""
+}
+
+type ValidationResp struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Role          UserRole               `protobuf:"varint,2,opt,name=role,proto3,enum=user_service.v1.UserRole" json:"role,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ValidationResp) Reset() {
+	*x = ValidationResp{}
+	mi := &file_user_service_user_service_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ValidationResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ValidationResp) ProtoMessage() {}
+
+func (x *ValidationResp) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_user_service_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ValidationResp.ProtoReflect.Descriptor instead.
+func (*ValidationResp) Descriptor() ([]byte, []int) {
+	return file_user_service_user_service_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ValidationResp) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *ValidationResp) GetRole() UserRole {
+	if x != nil {
+		return x.Role
+	}
+	return UserRole_USER_ROLE_UNSPECIFIED
+}
+
 var File_user_service_user_service_proto protoreflect.FileDescriptor
 
 const file_user_service_user_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1fuser_service/user_service.proto\x12\x0fuser_service.v1\x1a\x1egoogle/protobuf/duration.proto\x1a\x17validate/validate.proto\"\xa8\x01\n" +
+	"\x1fuser_service/user_service.proto\x12\x0fuser_service.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17validate/validate.proto\"\xa8\x01\n" +
 	"\rCreateUserReq\x12\x1b\n" +
 	"\x04name\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x02R\x04name\x12\x1d\n" +
 	"\x05email\x18\x02 \x01(\tB\a\xfaB\x04r\x02`\x01R\x05email\x12#\n" +
 	"\bpassword\x18\x03 \x01(\tB\a\xfaB\x04r\x02\x10\bR\bpassword\x126\n" +
-	"\tuser_role\x18\x04 \x01(\x0e2\x19.user_service.v1.UserRoleR\buserRole\"\xaf\x01\n" +
-	"\x0eCreateUserResp\x12,\n" +
-	"\raccsess_token\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\faccsessToken\x12-\n" +
-	"\rrefresh_token\x18\x02 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\frefreshToken\x12@\n" +
-	"\texpire_at\x18\x03 \x01(\v2\x19.google.protobuf.DurationB\b\xfaB\x05\xaa\x01\x02*\x00R\bexpireAt*[\n" +
+	"\tuser_role\x18\x04 \x01(\x0e2\x19.user_service.v1.UserRoleR\buserRole\"\xae\x01\n" +
+	"\x0eCreateUserResp\x12*\n" +
+	"\faccess_token\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\vaccessToken\x12-\n" +
+	"\rrefresh_token\x18\x02 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\frefreshToken\x12A\n" +
+	"\texpire_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampB\b\xfaB\x05\xb2\x01\x028\x01R\bexpireAt\"l\n" +
+	"\x0fUpdateTokensReq\x12*\n" +
+	"\faccess_token\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\vaccessToken\x12-\n" +
+	"\rrefresh_token\x18\x02 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\frefreshToken\"\xb0\x01\n" +
+	"\x10UpdateTokensResp\x12*\n" +
+	"\faccess_token\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\vaccessToken\x12-\n" +
+	"\rrefresh_token\x18\x02 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\frefreshToken\x12A\n" +
+	"\texpire_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampB\b\xfaB\x05\xb2\x01\x028\x01R\bexpireAt\";\n" +
+	"\rValidationReq\x12*\n" +
+	"\faccess_token\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\vaccessToken\"b\n" +
+	"\x0eValidationResp\x12!\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\x06userId\x12-\n" +
+	"\x04role\x18\x02 \x01(\x0e2\x19.user_service.v1.UserRoleR\x04role*[\n" +
 	"\bUserRole\x12\x19\n" +
 	"\x15USER_ROLE_UNSPECIFIED\x10\x00\x12\x18\n" +
 	"\x14USER_ROLE_BASIC_USER\x10\x01\x12\x1a\n" +
-	"\x16USER_ROLE_PREMIUM_USER\x10\x022\\\n" +
+	"\x16USER_ROLE_PREMIUM_USER\x10\x022\x86\x02\n" +
 	"\vUserService\x12M\n" +
 	"\n" +
-	"CreateUser\x12\x1e.user_service.v1.CreateUserReq\x1a\x1f.user_service.v1.CreateUserRespB;Z9github.com/DensCPU/gRPCServices/Protobuf/gen/user_serviceb\x06proto3"
+	"CreateUser\x12\x1e.user_service.v1.CreateUserReq\x1a\x1f.user_service.v1.CreateUserResp\x12S\n" +
+	"\fUpdateTokens\x12 .user_service.v1.UpdateTokensReq\x1a!.user_service.v1.UpdateTokensResp\x12S\n" +
+	"\x10ValidationTokens\x12\x1e.user_service.v1.ValidationReq\x1a\x1f.user_service.v1.ValidationRespB;Z9github.com/DensCPU/gRPCServices/Protobuf/gen/user_serviceb\x06proto3"
 
 var (
 	file_user_service_user_service_proto_rawDescOnce sync.Once
@@ -235,23 +457,33 @@ func file_user_service_user_service_proto_rawDescGZIP() []byte {
 }
 
 var file_user_service_user_service_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_user_service_user_service_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_user_service_user_service_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_user_service_user_service_proto_goTypes = []any{
-	(UserRole)(0),               // 0: user_service.v1.UserRole
-	(*CreateUserReq)(nil),       // 1: user_service.v1.CreateUserReq
-	(*CreateUserResp)(nil),      // 2: user_service.v1.CreateUserResp
-	(*durationpb.Duration)(nil), // 3: google.protobuf.Duration
+	(UserRole)(0),                 // 0: user_service.v1.UserRole
+	(*CreateUserReq)(nil),         // 1: user_service.v1.CreateUserReq
+	(*CreateUserResp)(nil),        // 2: user_service.v1.CreateUserResp
+	(*UpdateTokensReq)(nil),       // 3: user_service.v1.UpdateTokensReq
+	(*UpdateTokensResp)(nil),      // 4: user_service.v1.UpdateTokensResp
+	(*ValidationReq)(nil),         // 5: user_service.v1.ValidationReq
+	(*ValidationResp)(nil),        // 6: user_service.v1.ValidationResp
+	(*timestamppb.Timestamp)(nil), // 7: google.protobuf.Timestamp
 }
 var file_user_service_user_service_proto_depIdxs = []int32{
 	0, // 0: user_service.v1.CreateUserReq.user_role:type_name -> user_service.v1.UserRole
-	3, // 1: user_service.v1.CreateUserResp.expire_at:type_name -> google.protobuf.Duration
-	1, // 2: user_service.v1.UserService.CreateUser:input_type -> user_service.v1.CreateUserReq
-	2, // 3: user_service.v1.UserService.CreateUser:output_type -> user_service.v1.CreateUserResp
-	3, // [3:4] is the sub-list for method output_type
-	2, // [2:3] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	7, // 1: user_service.v1.CreateUserResp.expire_at:type_name -> google.protobuf.Timestamp
+	7, // 2: user_service.v1.UpdateTokensResp.expire_at:type_name -> google.protobuf.Timestamp
+	0, // 3: user_service.v1.ValidationResp.role:type_name -> user_service.v1.UserRole
+	1, // 4: user_service.v1.UserService.CreateUser:input_type -> user_service.v1.CreateUserReq
+	3, // 5: user_service.v1.UserService.UpdateTokens:input_type -> user_service.v1.UpdateTokensReq
+	5, // 6: user_service.v1.UserService.ValidationTokens:input_type -> user_service.v1.ValidationReq
+	2, // 7: user_service.v1.UserService.CreateUser:output_type -> user_service.v1.CreateUserResp
+	4, // 8: user_service.v1.UserService.UpdateTokens:output_type -> user_service.v1.UpdateTokensResp
+	6, // 9: user_service.v1.UserService.ValidationTokens:output_type -> user_service.v1.ValidationResp
+	7, // [7:10] is the sub-list for method output_type
+	4, // [4:7] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_user_service_user_service_proto_init() }
@@ -265,7 +497,7 @@ func file_user_service_user_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_user_service_proto_rawDesc), len(file_user_service_user_service_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   2,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

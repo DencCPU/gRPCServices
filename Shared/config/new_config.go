@@ -42,7 +42,7 @@ func NewConfig[T any](loader *ConfigLoader) (*T, error) {
 
 	pathLocalEnv := globalViper.GetString(loader.PathToLocalEnv)
 	if pathLocalEnv == "" {
-		return nil, fmt.Errorf("переменная %s не установлена", loader.PathToLocalEnv)
+		return nil, fmt.Errorf("variable %s is not set", loader.PathToLocalEnv)
 	}
 
 	envViper := viper.New()
@@ -50,12 +50,12 @@ func NewConfig[T any](loader *ConfigLoader) (*T, error) {
 	envViper.SetConfigType(loader.EnvType)
 
 	if err := envViper.ReadInConfig(); err != nil {
-		return nil, fmt.Errorf("ошибка чтения .env: %w", err)
+		return nil, fmt.Errorf("error reading .env: %w", err)
 	}
 
 	pathConfig := envViper.GetString(loader.PathToConfig)
 	if pathConfig == "" {
-		return nil, fmt.Errorf("переменная %s не установлена", loader.PathToConfig)
+		return nil, fmt.Errorf("variable %s is not set", loader.PathToConfig)
 	}
 
 	configViper := viper.New()

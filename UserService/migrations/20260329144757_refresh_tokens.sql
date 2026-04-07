@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS refresh_tokens(
     expire_at TIMESTAMPTZ NOT NULL,
     is_revoked BOOLEAN NOT NULL,
     user_id UUID REFERENCES users(id),
-    created_at TIMESTAMPTZ NOT NULL
+    created_at TIMESTAMPTZ NOT NULL,
+    update_at TIMESTAMPTZ 
 );
 -- +goose StatementEnd
 

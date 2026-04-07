@@ -2,13 +2,15 @@ syntax = "proto3";
 
 package user_service.v1;
 
-import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
 import "validate/validate.proto";
 
 option go_package = "github.com/DensCPU/gRPCServices/Protobuf/gen/user_service";
 
 service UserService {
   rpc CreateUser(CreateUserReq) returns (CreateUserResp);
+  rpc UpdateTokens(UpdateTokensReq) returns (UpdateTokensResp);
+  rpc ValidationTokens(ValidationReq) returns (ValidationResp);
 }
 
 message CreateUserReq {
@@ -19,13 +21,33 @@ message CreateUserReq {
 }
 
 message CreateUserResp {
-  string accsess_token = 1 [(validate.rules).string.min_len = 1];
+  string access_token = 1 [(validate.rules).string.min_len = 1];
   string refresh_token = 2 [(validate.rules).string.uuid = true];
-  google.protobuf.Duration expire_at = 3 [(validate.rules).duration.gt = {seconds: 0}];
+  google.protobuf.Timestamp expire_at = 3 [(validate.rules).timestamp.lt_now = true];
 }
 
 enum UserRole {
   USER_ROLE_UNSPECIFIED = 0;
   USER_ROLE_BASIC_USER = 1;
   USER_ROLE_PREMIUM_USER = 2;
+}
+
+message UpdateTokensReq {
+  string access_token = 1 [(validate.rules).string.min_len = 1];
+  string refresh_token = 2 [(validate.rules).string.uuid = true];
+}
+
+message UpdateTokensResp {
+  string access_token = 1 [(validate.rules).string.min_len = 1];
+  string refresh_token = 2 [(validate.rules).string.uuid = true];
+  google.protobuf.Timestamp expire_at = 3 [(validate.rules).timestamp.lt_now = true];
+}
+
+message ValidationReq {
+  string access_token = 1 [(validate.rules).string.min_len = 1];
+}
+
+message ValidationResp {
+  string user_id = 1 [(validate.rules).string.uuid = true];
+  UserRole role = 2;
 }

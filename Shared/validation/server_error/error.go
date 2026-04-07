@@ -6,7 +6,7 @@ import (
 )
 
 // Функция проверяет вид ошибки(клиентская или серверная)
-func ServerErrror(err error) bool {
+func ServerError(err error) bool {
 	if err == nil {
 		return false
 	}

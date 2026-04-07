@@ -22,7 +22,7 @@ func (p *PostgresDB) AddOrderStorage(ctx context.Context, newOrder orderdomain.O
 	//Начало транзакции
 	tx, err := p.Begin(ctx)
 	if err != nil {
-		p.logger.Error("ошибка начала транзакции:",
+		p.logger.Error("error starting transaction:",
 			zap.Error(err),
 		)
 		return "", "", err
@@ -31,7 +31,7 @@ func (p *PostgresDB) AddOrderStorage(ctx context.Context, newOrder orderdomain.O
 	//Добавление ID заказа
 	refOrderId, orderID, err := p.AddOrderID(tx, ctx, newOrder, markets)
 	if err != nil {
-		p.logger.Error("ошибка добавления OrderID:",
+		p.logger.Error("error adding OrderID:",
 			zap.Error(err),
 		)
 		tx.Rollback(ctx)
@@ -40,7 +40,7 @@ func (p *PostgresDB) AddOrderStorage(ctx context.Context, newOrder orderdomain.O
 	//Добавление пользователя
 	refUserID, err := p.AddUserID(tx, ctx, newOrder)
 	if err != nil {
-		p.logger.Error("ошибка добавления UserID:",
+		p.logger.Error("error adding UserID:",
 			zap.Error(err),
 		)
 		tx.Rollback(ctx)
@@ -50,7 +50,7 @@ func (p *PostgresDB) AddOrderStorage(ctx context.Context, newOrder orderdomain.O
 	//Добавление рынка
 	refMarketID, err := p.AddMarketID(tx, ctx, newOrder, markets)
 	if err != nil {
-		p.logger.Error("ошибка добавления MarketID:",
+		p.logger.Error("error adding MarketID:",
 			zap.Error(err),
 		)
 		tx.Rollback(ctx)
@@ -73,7 +73,7 @@ func (p *PostgresDB) AddOrderStorage(ctx context.Context, newOrder orderdomain.O
 	`, dto.Ref_User_Id, dto.Ref_Market_Id, dto.Order_type, dto.Price, dto.Quantity, dto.Status, dto.Ref_Order_Id, dto.Created_at).Scan(&order_status)
 	if err != nil {
 		tx.Rollback(ctx)
-		p.logger.Error("ошибка добавления заказа в БД:",
+		p.logger.Error("Error adding order to database:",
 			zap.Error(err),
 		)
 		return "", "", err
@@ -142,7 +142,7 @@ func (p *PostgresDB) AddOrderID(tx pgx.Tx, ctx context.Context, newOrder orderdo
 
 	//Запись в БД
 	var id int
-	err := tx.QueryRow(context.Background(), ` 
+	err := tx.QueryRow(ctx, ` 
 	INSERT INTO orders_id(order_id,created_at) 
 	VALUES ($1,$2)
 	RETURNING id

@@ -2,8 +2,9 @@ package postgres
 
 import (
 	"context"
-	"fmt"
 	"sync"
+
+	"go.uber.org/zap"
 )
 
 func (p *PostgresDB) ControlOrder(orderType string, user_id string, orderID string) chan string {
@@ -25,10 +26,11 @@ func (p *PostgresDB) ControlOrder(orderType string, user_id string, orderID stri
 	AND orders_id.order_id = $2
 	`, user_id, orderID).Scan(&id)
 		if err != nil {
-			fmt.Println("ошибка обработки заказа:", err)
+			p.logger.Error("order processing error:",
+				zap.Error(err),
+			)
 			return
 		}
-		fmt.Println("ID заказа:", id)
 		switch orderType {
 
 		case "normal":
@@ -36,7 +38,9 @@ func (p *PostgresDB) ControlOrder(orderType string, user_id string, orderID stri
 			status = "in progress"
 			err = p.UpdateStatus(id, status)
 			if err != nil {
-				fmt.Println("ошибка обработки заказа:", err)
+				p.logger.Error("order processing error:",
+					zap.Error(err),
+				)
 				return
 			}
 			stateCh <- status
@@ -44,7 +48,9 @@ func (p *PostgresDB) ControlOrder(orderType string, user_id string, orderID stri
 			status = "completed"
 			err = p.UpdateStatus(id, status)
 			if err != nil {
-				fmt.Println("ошибка обработки заказа:", err)
+				p.logger.Error("order processing error:",
+					zap.Error(err),
+				)
 				return
 			}
 			stateCh <- status
@@ -54,7 +60,9 @@ func (p *PostgresDB) ControlOrder(orderType string, user_id string, orderID stri
 			status = "in progress"
 			err = p.UpdateStatus(id, status)
 			if err != nil {
-				fmt.Println("ошибка обработки заказа:", err)
+				p.logger.Error("order processing error:",
+					zap.Error(err),
+				)
 				return
 			}
 			stateCh <- status
@@ -63,7 +71,9 @@ func (p *PostgresDB) ControlOrder(orderType string, user_id string, orderID stri
 			status = "completed"
 			err = p.UpdateStatus(id, status)
 			if err != nil {
-				fmt.Println("ошибка обработки заказа:", err)
+				p.logger.Error("order processing error:",
+					zap.Error(err),
+				)
 				return
 			}
 			stateCh <- status

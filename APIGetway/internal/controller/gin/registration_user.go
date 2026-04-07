@@ -27,7 +27,7 @@ func (api *GinAPI) RegistrationUser(c *gin.Context) {
 	}
 	fmt.Println(pairToken)
 	c.JSON(http.StatusOK, gin.H{
-		"accsess token": pairToken.AccsessToken,
+		"accsess token": pairToken.AccessToken,
 		"refresh token": pairToken.RefreshToken,
 		"expire_at":     pairToken.Expire_at,
 	})

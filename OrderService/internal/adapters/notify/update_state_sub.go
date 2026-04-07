@@ -2,7 +2,6 @@ package notify
 
 import (
 	"sync"
-	"time"
 
 	orderdomain "github.com/DencCPU/gRPCServices/OrderService/internal/domain/order"
 )
@@ -32,7 +31,7 @@ func (s *StatusStorage) UpdateStatusSubs(key orderdomain.Key) {
 				return
 			}
 			laststatus = status
-			time.Sleep(3 * time.Second)
+			//Поставить тикер
 		}
 	}()
 

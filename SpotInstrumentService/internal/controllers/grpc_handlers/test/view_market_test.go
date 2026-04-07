@@ -10,7 +10,7 @@ import (
 
 	spot "github.com/DencCPU/gRPCServices/Protobuf/gen/spot_service"
 	"github.com/DencCPU/gRPCServices/Shared/logger"
-	opentelemetry "github.com/DencCPU/gRPCServices/Shared/opentelimetry"
+	"github.com/DencCPU/gRPCServices/Shared/opentelemetry"
 	"github.com/DencCPU/gRPCServices/SpotInstrumentService/internal/adapters/memory"
 	spothandlers "github.com/DencCPU/gRPCServices/SpotInstrumentService/internal/controllers/grpc_handlers"
 	"github.com/DencCPU/gRPCServices/SpotInstrumentService/internal/usecase"

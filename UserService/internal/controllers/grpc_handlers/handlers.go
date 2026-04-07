@@ -2,15 +2,17 @@ package userhandlers
 
 import (
 	"context"
-	"time"
 
 	"github.com/DencCPU/gRPCServices/Protobuf/gen/user_service"
+	tokensdto "github.com/DencCPU/gRPCServices/UserService/internal/adapters/dto/tokens"
+	"github.com/DencCPU/gRPCServices/UserService/internal/adapters/dto/user"
 	domainuser "github.com/DencCPU/gRPCServices/UserService/internal/domain/user"
 )
 
 type Service interface {
-	CreateUser(context.Context, domainuser.User) (string, string, time.Duration, error)
-	UpdatePassword(context.Context, string, string) error
+	CreateUser(context.Context, domainuser.User) (tokensdto.PairToken, error)
+	UpdateTokens(context.Context, tokensdto.InputTokens) (tokensdto.PairToken, error)
+	Validation(ctx context.Context, accessToken string) (user.Output, error)
 }
 
 type Handler struct {

@@ -23,7 +23,7 @@ func (s *Storage) AccessControl(ctx context.Context) string {
 		select {
 		case <-ctx.Done():
 			// fmt.Println("Время жизни цикла истекло")
-			return "Управленение работой рынков завершено"
+			return "Market management has been completed"
 		default:
 			d := rand.Intn(3) //Случайная блокировка или удаление рынка
 			switch d {

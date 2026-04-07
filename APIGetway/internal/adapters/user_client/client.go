@@ -1,4 +1,4 @@
-package userservice
+package userclient
 
 import (
 	user "github.com/DencCPU/gRPCServices/Protobuf/gen/user_service"

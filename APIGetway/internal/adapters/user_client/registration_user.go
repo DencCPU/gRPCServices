@@ -1,14 +1,14 @@
-package userservice
+package userclient
 
 import (
 	"context"
 
-	"github.com/DencCPU/gRPCServices/APIGetway/internal/adapters/dto/jwt"
+	"github.com/DencCPU/gRPCServices/APIGetway/internal/adapters/dto/tokens"
 	userdomain "github.com/DencCPU/gRPCServices/APIGetway/internal/domain/user"
 	"github.com/DencCPU/gRPCServices/Protobuf/gen/user_service"
 )
 
-func (c *Client) RegistrationUser(ctx context.Context, newUser userdomain.User) (jwt.PairToken, error) {
+func (c *Client) RegistrationUser(ctx context.Context, newUser userdomain.User) (tokens.PairToken, error) {
 	req := &user_service.CreateUserReq{
 		Name:     newUser.Name,
 		Email:    newUser.Email,
@@ -17,12 +17,12 @@ func (c *Client) RegistrationUser(ctx context.Context, newUser userdomain.User) 
 	}
 	resp, err := c.CreateUser(ctx, req)
 	if err != nil {
-		return jwt.PairToken{}, err
+		return tokens.PairToken{}, err
 	}
-	pairToken := jwt.NewPairToken(
-		resp.AccsessToken,
+	pairToken := tokens.NewPairToken(
+		resp.AccessToken,
 		resp.RefreshToken,
-		resp.ExpireAt.AsDuration(),
+		resp.ExpireAt.AsTime(),
 	)
 	return pairToken, nil
 }

@@ -4,6 +4,7 @@ type Config struct {
 	Server   Server   `mapstructure:"server"`
 	Postgres Postgres `mapstructure:"postgres"`
 	JWT      JWT      `mapstructure:"jwt"`
+	Jaeger   Jaeger   `mapstructure:"jaeger"`
 }
 
 type Server struct {
@@ -24,4 +25,9 @@ type Postgres struct {
 type JWT struct {
 	Secret string `mapstructure:"secret"`
 	TTL    int    `mapstructure:"ttl"`
+}
+
+type Jaeger struct {
+	Host string `mapstructure:"host"`
+	Port string `mapstructure:"port"`
 }

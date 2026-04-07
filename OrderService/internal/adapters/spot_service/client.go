@@ -41,7 +41,7 @@ func NewClient(cfg orderconfig.BreakerSetting, logger *zap.Logger) (*Client, err
 			}
 		},
 		IsSuccessful: func(err error) bool { //Функция, определяющая, какие ошибки учитываются
-			return servererror.ServerErrror(err)
+			return servererror.ServerError(err)
 		},
 	}
 	breaker := gobreaker.NewCircuitBreaker(setting)

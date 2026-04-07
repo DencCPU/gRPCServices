@@ -16,7 +16,8 @@ import (
 	"github.com/DencCPU/gRPCServices/Shared/config"
 	entryorderservice "github.com/DencCPU/gRPCServices/Shared/enter_points/entry_order_service"
 	"github.com/DencCPU/gRPCServices/Shared/logger"
-	opentelemetry "github.com/DencCPU/gRPCServices/Shared/opentelimetry"
+	"github.com/DencCPU/gRPCServices/Shared/opentelemetry"
+
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"

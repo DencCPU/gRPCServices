@@ -14,8 +14,33 @@ func (api *GinAPI) CreateOrderHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
+		return
 	}
-	user_id := c.GetInt64("user_id")
+	uid, exist := c.Get("x-user-id")
+	if !exist {
+		c.JSON(http.StatusBadGateway, gin.H{
+			"error": "user_id missing",
+		})
+		return
+	}
+	user_id, ok := uid.(string)
+	if !ok {
+		c.JSON(http.StatusBadGateway, gin.H{
+			"error": "error casting user_id to string type",
+		})
+		return
+	}
 	order.User_id = user_id
-	//Достать userID из контектса(middleware)
+
+	output, err := api.service.CreateOrder(c.Request.Context(), order)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"order_id":     output.Order_id,
+		"order_status": output.Order_status,
+	})
 }

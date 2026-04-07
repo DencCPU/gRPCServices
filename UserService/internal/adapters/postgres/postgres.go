@@ -28,7 +28,7 @@ func NewDB(ctx context.Context, logger *zap.Logger, cfg userconfig.Postgres) (*P
 	fmt.Println(dsn)
 	db, err := pgxpool.New(ctx, dsn)
 	if err != nil {
-		return nil, fmt.Errorf("postgres database is unavailable:%w", err) //Нужно ли эту ошибку отнести в доменную область?
+		return nil, fmt.Errorf("postgres database is unavailable:%w", err)
 	}
 
 	// Проверка соединения

@@ -1,4 +1,4 @@
-package jwtdto
+package tokensdto
 
 import (
 	"time"
@@ -14,40 +14,55 @@ type RefreshToken struct {
 	IsRevoked  bool
 	UserId     uuid.UUID
 	Created_at time.Time
+	Update_at  time.Time
 }
 
 type PairToken struct {
-	AccsesToken  string
+	AccessToken  string
 	RefreshToken string
-	Expire_at    time.Duration
+	Expire_at    time.Time
 }
 
-type AccsessClaim struct {
-	User_id string
-	email   string
+type AccessClaim struct {
+	User_id string `json:"user_id"`
+	Email   string `json:"email"`
+	Role    string `json:"role"`
 	jwt.RegisteredClaims
+}
+
+type InputTokens struct {
+	AccsesToken  string
+	RefreshToken string
 }
 
 func NewRefreshToken(user_id uuid.UUID) *RefreshToken {
 	return &RefreshToken{
 		Token:     uuid.NewString(),
-		Expire_at: time.Now().Add(2 * time.Hour),
+		Expire_at: time.Now().Add(5 * 24 * time.Hour),
 		IsRevoked: false,
 		UserId:    user_id,
 	}
 }
 
-func NewPairToken(accsesToken string, refreshToken string, expire_at time.Duration) PairToken {
+func NewPairToken(accessToken string, refreshToken string, expire_at time.Time) PairToken {
 	return PairToken{
-		AccsesToken:  accsesToken,
+		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		Expire_at:    expire_at,
 	}
 }
 
-func NewAccsessClaim(user_id, email string) *AccsessClaim {
-	return &AccsessClaim{
+func NewAccessClaim(user_id, email, role string) *AccessClaim {
+	return &AccessClaim{
 		User_id: user_id,
-		email:   email,
+		Email:   email,
+		Role:    role,
+	}
+}
+
+func NewInputTokens(accessToken string, refreshToken string) InputTokens {
+	return InputTokens{
+		AccsesToken:  accessToken,
+		RefreshToken: refreshToken,
 	}
 }

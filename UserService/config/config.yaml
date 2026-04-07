@@ -10,3 +10,11 @@ postgres:
   password: 
   name: 
   sslmode: "disable"
+
+jwt:
+  secret:
+  ttl: 10
+
+jaeger:
+  host: 
+  port: 

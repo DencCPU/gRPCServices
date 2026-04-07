@@ -10,7 +10,7 @@ import (
 	"github.com/DencCPU/gRPCServices/Shared/config"
 	entryspotservice "github.com/DencCPU/gRPCServices/Shared/enter_points/entry_spot_service"
 	"github.com/DencCPU/gRPCServices/Shared/logger"
-	opentelemetry "github.com/DencCPU/gRPCServices/Shared/opentelimetry"
+	"github.com/DencCPU/gRPCServices/Shared/opentelemetry"
 	spotconfig "github.com/DencCPU/gRPCServices/SpotInstrumentService/config"
 	"github.com/DencCPU/gRPCServices/SpotInstrumentService/internal/adapters/memory"
 	redisadapter "github.com/DencCPU/gRPCServices/SpotInstrumentService/internal/adapters/redis"
@@ -34,7 +34,7 @@ func LoggerModul() fx.Option {
 			func() (*zap.Logger, error) {
 				logger, err := logger.NewLogger()
 				if err != nil {
-					return nil, fmt.Errorf("ошибка инициализации логгера:%w", err)
+					return nil, fmt.Errorf("logger initialition error:%w", err)
 				}
 				return logger, nil
 			},
@@ -114,7 +114,7 @@ func NewConfigModul() fx.Option {
 		func(loader *config.ConfigLoader, logger *zap.Logger) (*spotconfig.Config, error) {
 			config, err := config.NewConfig[spotconfig.Config](loader)
 			if err != nil {
-				logger.Error("ошибка получения конфига:",
+				logger.Error("error getting config:",
 					zap.Error(err),
 				)
 				return nil, err
@@ -132,7 +132,7 @@ func RedisModule() fx.Option {
 			defer cancel()
 			redis, err := redisadapter.NewRedis(rctx, config.Redis)
 			if err != nil {
-				logger.Error("ошибка инициализации redis:",
+				logger.Error("redis initialization error:",
 					zap.Error(err))
 				return nil, err
 			}
@@ -152,7 +152,7 @@ func TracingModule() fx.Option {
 				))
 				trace, err := opentelemetry.NewTrace(context.Background(), "spotService", config.Jaeger.Host, config.Jaeger.Port)
 				if err != nil {
-					logger.Error("ошибка инициализации трейсера:",
+					logger.Error("tracer initialization error:",
 						zap.Error(err))
 					return nil, nil, err
 				}
@@ -179,7 +179,7 @@ func MetricModul() fx.Option {
 			func(logger *zap.Logger) (*sdkmetric.MeterProvider, error) {
 				provider, err := opentelemetry.NewMetricPrometeus(context.Background(), "SpotService")
 				if err != nil {
-					logger.Error("ошибка инициализации метрик:",
+					logger.Error("metrics initialization error:",
 						zap.Error(err))
 					return nil, err
 				}
@@ -193,10 +193,10 @@ func MetricModul() fx.Option {
 					OnStart: func(ctx context.Context) error {
 						go func() {
 							http.Handle("/metrics", promhttp.Handler())
-							logger.Info("Запущен сервер для метрик на порту 9464...")
+							logger.Info("The metrics server has been launched on port 9464...")
 							err := http.ListenAndServe(":9464", nil)
 							if err != nil {
-								logger.Error("ошибка работы сервера для метрик:",
+								logger.Error("server error for metrics:",
 									zap.Error(err),
 								)
 							}
@@ -238,7 +238,7 @@ func GrpcModule() fx.Option {
 			func(redis *redisadapter.RedisDB, config *spotconfig.Config, logger *zap.Logger) (*grpcserver.Server, error) {
 				grpcServer, err := grpcserver.New(redis, config.Server, logger)
 				if err != nil {
-					logger.Error("ошибка инициализации grpc-сервера:",
+					logger.Error("grpc server initialization error:",
 						zap.Error(err),
 					)
 					return nil, err
@@ -255,10 +255,10 @@ func GrpcModule() fx.Option {
 				lc.Append(fx.Hook{
 					OnStart: func(ctx context.Context) error {
 						go func() {
-							logger.Info("Сервер запущен на порту 8080...")
+							logger.Info("Server start on port 8080...")
 							err := server.Serve(server.Listener)
 							if err != nil {
-								logger.Error("ошибка работы сервера:",
+								logger.Error("error working server:",
 									zap.Error(err))
 							}
 						}()
@@ -267,16 +267,16 @@ func GrpcModule() fx.Option {
 					OnStop: func(ctx context.Context) error {
 						done := make(chan struct{})
 						go func() {
-							logger.Info("Остановка работы сервера...")
+							logger.Info("stopping the server...")
 							server.GracefulStop()
 							close(done)
 						}()
 						select {
 						case <-done:
-							logger.Info("Сервер остановлен")
+							logger.Info("Server stopped")
 							return nil
 						case <-ctx.Done():
-							logger.Info("Остановка серврера по таймауту")
+							logger.Info("Stopping the server by timeout")
 							server.Stop()
 							return ctx.Err()
 						}
@@ -302,7 +302,7 @@ func FxAppRunner() (*fx.App, error) {
 	)
 
 	if err := app.Err(); err != nil {
-		return nil, fmt.Errorf("ошибка инициализации графа зависимостей:%w", err)
+		return nil, fmt.Errorf("dependency graph initialization error:%w", err)
 	}
 
 	return app, nil

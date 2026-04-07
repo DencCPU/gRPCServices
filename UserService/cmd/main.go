@@ -7,8 +7,9 @@ import (
 )
 
 func main() {
-	err := apprunner.AppRunner()
+	app, err := apprunner.FxAppRunner()
 	if err != nil {
 		log.Fatal(err)
 	}
+	app.Run()
 }

@@ -11,12 +11,18 @@ import (
 
 // Добавление нового пользоваткля
 func (p *PostgresDB) AddUser(ctx context.Context, newUser domainuser.User) (string, string, error) {
+
+	//Start of transaction
 	tx, err := p.Begin(ctx)
 	if err != nil {
 		return "", "", err
 	}
+
+	//Create New DTO
 	dto := postgresdto.NewUserDTO(newUser.Name, newUser.Email, newUser.Password, newUser.Role)
 	dto.Created_at = time.Now()
+
+	//Adding a new record to the database
 	id := uuid.New()
 	err = tx.QueryRow(ctx, `
 	INSERT INTO users(id,name,email,password,role,created_at)
@@ -29,6 +35,7 @@ func (p *PostgresDB) AddUser(ctx context.Context, newUser domainuser.User) (stri
 		return "", "", err
 	}
 
+	//Create a new refresh token
 	token, err := p.AddRefreshToken(tx, ctx, dto.ID)
 	if err != nil {
 		tx.Rollback(ctx)
@@ -39,7 +46,7 @@ func (p *PostgresDB) AddUser(ctx context.Context, newUser domainuser.User) (stri
 	return dto.ID.String(), token, nil
 }
 
-// Замена пароля
+// Update password
 func (p *PostgresDB) UpdatePassword(ctx context.Context, email, password string) error {
 	dto := postgresdto.NewUpdatePassord(email, password)
 	dto.Update_at = time.Now()

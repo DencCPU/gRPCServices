@@ -13,7 +13,7 @@ func (o *OrderService) GetStatus(ctx context.Context, key orderdomain.Key) (stri
 	defer span.End()
 	status, err := o.GetOrderState(ctx, key)
 	if err != nil {
-		o.logger.Error("ошибка получения статуса заказа:",
+		o.logger.Error("error receiving order status:",
 			zap.Error(err),
 		)
 		return "", err

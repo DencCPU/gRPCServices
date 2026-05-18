@@ -2,6 +2,7 @@ server:
   port: 
   host: 
   network: "tcp"
+  request_per_second_limit: 100
 
 postgres:
   host: 
@@ -11,14 +12,20 @@ postgres:
   name: 
   sslmode: "disable"
   chan_size: 10
+  idepmpotency_cache_ttl: 5s
 
 breakersetting:
   name: "OrderService"
   max_request: 5
-  interval: 60
-  timeout: 10
+  interval: 60s
+  timeout: 10s
   max_fail_request: 10
 
-jaeger:
-  host: 
-  port: 
+notify:
+  ticker_interval: 1ms
+
+collector:
+  host:
+  port:
+  trace_percentage: 100
+  metric_interval: 1s

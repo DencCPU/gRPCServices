@@ -1,16 +1,19 @@
 package userconfig
 
+import "time"
+
 type Config struct {
-	Server   Server   `mapstructure:"server"`
-	Postgres Postgres `mapstructure:"postgres"`
-	JWT      JWT      `mapstructure:"jwt"`
-	Jaeger   Jaeger   `mapstructure:"jaeger"`
+	Server        Server        `mapstructure:"server"`
+	Postgres      Postgres      `mapstructure:"postgres"`
+	JWT           JWT           `mapstructure:"jwt"`
+	OtelCollector OtelCollector `mapstructure:"collector"`
 }
 
 type Server struct {
-	Host    string `mapstructure:"host"`
-	Port    string `mapstructure:"port"`
-	Network string `mapstructure:"network"`
+	Host                  string `mapstructure:"host"`
+	Port                  string `mapstructure:"port"`
+	Network               string `mapstructure:"network"`
+	RequestPerSecondLimit uint   `mapstructure:"request_per_second_limit"`
 }
 
 type Postgres struct {
@@ -27,7 +30,9 @@ type JWT struct {
 	TTL    int    `mapstructure:"ttl"`
 }
 
-type Jaeger struct {
-	Host string `mapstructure:"host"`
-	Port string `mapstructure:"port"`
+type OtelCollector struct {
+	Host            string        `mapstructure:"host"`
+	Port            string        `mapstructure:"port"`
+	TracePercentage int           `mapstructure:"trace_percentage"`
+	MetricInterval  time.Duration `mapstructure:"metric_interval"`
 }

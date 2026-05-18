@@ -10,7 +10,7 @@ const (
 	USER_ROLE_PREMIUM_USER UserRole = 2
 )
 
-type OrderType int32
+type OrderType int64
 
 const (
 	ORDER_TYPE_UNSPECIFIED OrderType = 0
@@ -18,18 +18,26 @@ const (
 	ORDER_TYPE_EXPRESS     OrderType = 2
 )
 
+const (
+	StatusCreated    = "created"
+	StatusProcessing = "processing"
+	StatusComplited  = "complited"
+	StatusCancel     = "cancel"
+)
+
 type Order struct {
-	UserId    string
-	MarketId  string
-	OrderType OrderType
-	Price     decimal.Decimal
-	Quantity  int64
-	Status    string
-	UserRole  UserRole
+	UserId         string
+	MarketId       string
+	OrderType      OrderType
+	Price          decimal.Decimal
+	Quantity       int64
+	Status         string
+	UserRole       UserRole
+	IdempotencyKey string
 }
 
 type Key struct {
-	UserId  string //uuid
+	UserId  string
 	OrderId string
 }
 
@@ -42,4 +50,12 @@ type OrderInfo struct {
 	OrderType OrderType
 	UserId    string
 	OrderId   string
+}
+
+type ReceivedOrderInfo struct {
+	Status     string
+	OrderId    string
+	Price      decimal.Decimal
+	Quantity   int64
+	MarketName string
 }

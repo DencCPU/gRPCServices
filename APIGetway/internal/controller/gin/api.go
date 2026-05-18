@@ -2,17 +2,16 @@ package gin
 
 import (
 	"context"
-	"net/http"
 
 	orderdto "github.com/DencCPU/gRPCServices/APIGetway/internal/adapters/dto/order_service"
 	spotservicedto "github.com/DencCPU/gRPCServices/APIGetway/internal/adapters/dto/spot_service"
 	"github.com/DencCPU/gRPCServices/APIGetway/internal/adapters/dto/tokens"
 	userservicedto "github.com/DencCPU/gRPCServices/APIGetway/internal/adapters/dto/user_service"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 
 	orderdomain "github.com/DencCPU/gRPCServices/APIGetway/internal/domain/order"
 	userdomain "github.com/DencCPU/gRPCServices/APIGetway/internal/domain/user"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
 )
 
 type Service interface {
@@ -30,7 +29,6 @@ type GinAPI struct {
 	r              *gin.Engine
 	service        Service
 	exeptionalPath map[string]bool
-	upgrader       websocket.Upgrader
 }
 
 func NewGinAPI(service Service) GinAPI {
@@ -42,20 +40,14 @@ func NewGinAPI(service Service) GinAPI {
 		"/user/reg":  true,
 		"/user/auth": true,
 	}
-
-	api.upgrader = websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool {
-			return true
-		},
-	}
+	api.r.Use(otelgin.Middleware("API/getway"))
+	api.r.Use(api.Middleware())
 
 	api.endpoints()
 	return api
 }
 
 func (api *GinAPI) endpoints() {
-	//Middleware
-	api.r.Use(api.Middleware())
 
 	//OrderSevice
 	api.r.POST("/order", api.CreateOrderHandler)             //Create order

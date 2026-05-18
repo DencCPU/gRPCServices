@@ -4,9 +4,9 @@ import orderdomain "github.com/DencCPU/gRPCServices/OrderService/internal/domain
 
 // Получение актуального статуса заказа
 func (s *StatusStorage) GetStatus(key orderdomain.Key) string {
-	s.mu.Lock()
+	s.mu.RLock()
 	status := s.Status[key]
-	s.mu.Unlock()
+	s.mu.RUnlock()
 	if status == "" {
 		return "created"
 	}

@@ -8,7 +8,7 @@ import (
 )
 
 func (s *Service) GetStreamStatus(ctx context.Context, input orderdto.GetInput, msgChan chan orderdto.StreamOutput) error {
-	err := s.order_client.GetStreamStatus(ctx, input, msgChan)
+	err := s.orderClient.GetStreamStatus(ctx, input, msgChan)
 	if err != nil {
 		s.logger.Error("streaming status error:",
 			zap.Error(err),

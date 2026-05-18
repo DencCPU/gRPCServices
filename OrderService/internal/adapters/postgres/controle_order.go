@@ -50,7 +50,7 @@ func (p *PostgresDB) processOrder(orderInfo orderdomain.OrderInfo) error {
 		statusChan = make(chan string, 1)
 	)
 
-	err := p.QueryRow(p.ctx, ` 
+	err := p.db.QueryRow(p.ctx, ` 
 				SELECT orders.id
 				FROM orders
 				JOIN users ON orders.user_id = users.id
@@ -64,21 +64,21 @@ func (p *PostgresDB) processOrder(orderInfo orderdomain.OrderInfo) error {
 	p.wg.Add(1)
 	go func() {
 		defer p.wg.Done()
-		p.AddNewState(orderInfo.UserId, orderInfo.OrderId, statusChan)
+		p.notify.AddNewState(orderInfo.UserId, orderInfo.OrderId, statusChan)
 	}()
 	defer close(statusChan)
 
 	switch orderInfo.OrderType {
 
 	case orderdomain.ORDER_TYPE_NORMAL:
-		status = "in progress"
+		status = orderdomain.StatusProcessing
 		err := p.UpdateStatus(p.ctx, id, status)
 		if err != nil {
 			return err
 		}
 		statusChan <- status
 
-		status = "comlited"
+		status = orderdomain.StatusComplited
 		err = p.UpdateStatus(p.ctx, id, status)
 		if err != nil {
 			return err
@@ -86,14 +86,14 @@ func (p *PostgresDB) processOrder(orderInfo orderdomain.OrderInfo) error {
 		statusChan <- status
 
 	case orderdomain.ORDER_TYPE_EXPRESS:
-		status = "in progress"
+		status = orderdomain.StatusProcessing
 		err := p.UpdateStatus(p.ctx, id, status)
 		if err != nil {
 			return err
 		}
 		statusChan <- status
 
-		status = "comlited"
+		status = orderdomain.StatusComplited
 		err = p.UpdateStatus(p.ctx, id, status)
 		statusChan <- status
 	}

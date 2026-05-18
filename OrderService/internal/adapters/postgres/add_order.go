@@ -20,7 +20,7 @@ func (p *PostgresDB) AddOrderStorage(ctx context.Context, newOrder orderdomain.O
 	dto := postgresdto.CreatOrderDTO(newOrder)
 
 	//Начало транзакции
-	tx, err := p.Begin(ctx)
+	tx, err := p.db.Begin(ctx)
 	if err != nil {
 		return "", "", fmt.Errorf("error starting transaction:%w", err)
 	}
@@ -46,7 +46,7 @@ func (p *PostgresDB) AddOrderStorage(ctx context.Context, newOrder orderdomain.O
 	dto.RefUserId = refUserID
 	dto.RefMarketId = refMarketID
 	dto.RefOrderId = refOrderId
-	dto.Status = "created"
+	dto.Status = orderdomain.StatusCreated
 	dto.CreatedAt = time.Now()
 
 	//Добавление заказа

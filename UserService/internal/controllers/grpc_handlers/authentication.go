@@ -9,6 +9,7 @@ import (
 )
 
 func (h *Handler) Authentication(ctx context.Context, req *user_service.AuthReq) (*user_service.AuthResp, error) {
+
 	err := req.Validate()
 	if err != nil {
 		return nil, fmt.Errorf("incorrect data format:%w", err)

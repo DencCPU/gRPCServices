@@ -35,7 +35,7 @@ func (s *Storage) GetEnableMarkets(input domainusers.Input) ([]*domainmarket.Mar
 			i++
 		}
 		i++
-		for input.PageSize != 0 || i < len(s.keys) {
+		for input.PageSize != 0 && i < len(s.keys) {
 			s.mu.RLock()
 			key := s.keys[i]
 			if (s.date[key].DeleteAt == nil || s.date[key].Enable == true) && s.date[key].UserAccess == input.UserRole {

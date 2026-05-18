@@ -34,7 +34,7 @@ func (s *Storage) AccessControl(ctx context.Context) string {
 
 				s.mu.Lock()
 				key := markets[n]
-				if s.date[key].Enable != false { //Проверка доступа к рынку
+				if s.date[key].Enable != false { 
 					s.date[key].Enable = false
 					s.mu.Unlock()
 					break
@@ -46,7 +46,7 @@ func (s *Storage) AccessControl(ctx context.Context) string {
 
 				s.mu.Lock()
 				key := markets[n]
-				if s.date[key].Enable != false { //Проверка доступа к рынку
+				if s.date[key].Enable != false { 
 					s.date[key].Enable = false
 					delete_at := time.Now().Local()
 					s.date[key].DeleteAt = &delete_at
@@ -55,7 +55,7 @@ func (s *Storage) AccessControl(ctx context.Context) string {
 				}
 				s.mu.Unlock()
 
-			case 2: //Востановление доступа к маркету на рынке
+			case 2: 
 
 				n := rand.Intn(len(markets))
 

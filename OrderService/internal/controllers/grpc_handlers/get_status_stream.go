@@ -12,7 +12,7 @@ import (
 func (h *Handlers) StreamOrderUpdate(req *order.StreamOrderUpdateReq, stream order.OrderService_StreamOrderUpdateServer) error {
 	//Validation request
 	if err := req.Validate(); err != nil {
-		return nil
+		return err
 	}
 
 	key := orderdomain.Key{

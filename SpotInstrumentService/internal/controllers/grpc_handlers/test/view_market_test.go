@@ -26,7 +26,7 @@ func TestHandlers_ViewMarket(t *testing.T) {
 		t.Fatal("Ошибка записи в файл:", err)
 	}
 	logger, _ := logger.NewLogger()
-	tracerProvider, _ := opentelemetry.NewGrpcTracer(context.Background(), "", "localhost", "4317")
+	tracerProvider, _ := opentelemetry.NewTracerProviderGrpc(context.Background(), "", "localhost", "4317", 30)
 	tracer := tracerProvider.Tracer("SpotService")
 	s, err := memory.NewStorage(logger)
 	if err != nil {

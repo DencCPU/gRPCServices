@@ -1,36 +1,48 @@
 package orderconfig
 
+import "time"
+
 type Config struct {
 	Server         Server         `mapstructure:"server"`
 	Postgres       Postgres       `mapstructure:"postgres"`
-	BreakerSetting BreakerSetting `mapsstructure:"breakersetting"`
-	Jaeger         Jaeger         `mapsstructure:"jaeger"`
+	Notify         Notify         `mapstructure:"notify"`
+	BreakerSetting BreakerSetting `mapstructure:"breakersetting"`
+	OtelCollector  OtelCollector  `mapstructure:"collector"`
 }
+
 type Server struct {
-	Port    int    `mapstructure:"port"`
-	Host    string `mapstructure:"host"`
-	Network string `mapstructure:"network"`
+	Port                  int    `mapstructure:"port"`
+	Host                  string `mapstructure:"host"`
+	Network               string `mapstructure:"network"`
+	RequestPerSecondLimit uint   `mapstructure:"request_per_second_limit"`
 }
 
 type Postgres struct {
-	Host            string `mapstructure:"host"`
-	Port            int    `mapstructure:"port"`
-	User            string `mapstructure:"user"`
-	Password        string `mapstructure:"password"`
-	Name            string `mapstructure:"name"`
-	Sslmode         string `mapstructure:"sslmode"`
-	ControlChanSize int    `mapstructure:"chan_size"`
+	Host                string        `mapstructure:"host"`
+	Port                int           `mapstructure:"port"`
+	User                string        `mapstructure:"user"`
+	Password            string        `mapstructure:"password"`
+	Name                string        `mapstructure:"name"`
+	Sslmode             string        `mapstructure:"sslmode"`
+	ControlChanSize     int           `mapstructure:"chan_size"`
+	IdempotencyCacheTTL time.Duration `mapstructure:"idepmpotency_cache_ttl"`
+}
+
+type Notify struct {
+	TickerInterval time.Duration `mapstructure:"ticker_interval"`
 }
 
 type BreakerSetting struct {
-	Name           string `mapstructure:"name"`             //Название брейкера
-	MaxRequests    uint32 `mapstructure:"max_request"`      //Максимально кол-во запросов, пропускаемых в полуоткрытом режиме(Half-open)
-	Interval       uint   `mapstructure:"interval"`         //Период сброса статистики подсчета неудачных запросов в закрытом режиме(Close). Время в секундах.
-	Timeout        uint   `mapstructure:"timeout"`          //Время прибывания брейкера в открытом состоянии, перед переходов в Half-open.
-	MaxFailRequest uint32 `mapstructure:"max_fail_request"` //Количество неудачных запросов, после которого брейкер перейдет в состояние Open
+	Name           string        `mapstructure:"name"`
+	MaxRequests    uint32        `mapstructure:"max_request"`
+	Interval       time.Duration `mapstructure:"interval"`
+	Timeout        time.Duration `mapstructure:"timeout"`
+	MaxFailRequest uint32        `mapstructure:"max_fail_request"`
 }
 
-type Jaeger struct {
-	Host string `mapstructure:"host"`
-	Port string `mapstructure:"port"`
+type OtelCollector struct {
+	Host            string        `mapstructure:"host"`
+	Port            string        `mapstructure:"port"`
+	TracePercentage int           `mapstructure:"trace_percentage"`
+	MetricInterval  time.Duration `mapstructure:"metric_interval"`
 }

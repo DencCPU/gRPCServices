@@ -11,11 +11,12 @@ import (
 
 type Storage interface {
 	AddOrderStorage(ctx context.Context, newOrder orderdomain.Order, markets []orderdomain.Market) (orderID string, orderStatus string, err error) //Добавление нового заказа в хранилище
-	GetOrderState(ctx context.Context, key orderdomain.Key) (status string, err error)                                                             //Получение статуса заказа
+	GetOrderState(ctx context.Context, key orderdomain.Key) (orderInfo orderdomain.ReceivedOrderInfo, err error)
+	IdempotencyCheck(idepotencyKey string) bool
 }
 
 type MarketsService interface {
-	GetEnableMarkets(ctx context.Context, userID string, userRole orderdomain.UserRole) ([]orderdomain.Market, error) //Получение списка доступных рынков
+	GetEnableMarkets(ctx context.Context, userID string, userRole orderdomain.UserRole) ([]orderdomain.Market, error)
 }
 
 type Notify interface {
@@ -27,13 +28,13 @@ type Notify interface {
 }
 
 type OrderService struct {
-	Storage
-	MarketsService
-	Notify
-	logger *zap.Logger
-	tracer trace.Tracer
+	storage     Storage
+	spotService MarketsService
+	notify      Notify
+	logger      *zap.Logger
+	tracer      trace.Tracer
 }
 
-func NewOrderServ(in_memory Storage, markets_service MarketsService, notify Notify, logger *zap.Logger, trace trace.Tracer) *OrderService {
-	return &OrderService{in_memory, markets_service, notify, logger, trace}
+func NewOrderServ(in_memory Storage, markets_service MarketsService, notify Notify, logger *zap.Logger, tracer trace.Tracer) *OrderService {
+	return &OrderService{in_memory, markets_service, notify, logger, tracer}
 }

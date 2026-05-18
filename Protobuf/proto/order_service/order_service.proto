@@ -4,6 +4,7 @@ package order_service.v2;
 
 import "common/common.proto";
 import "google/protobuf/timestamp.proto";
+import "money/money.proto";
 import "validate/validate.proto";
 
 option go_package = "github.com/DenсCPU/gRPCServices/Protobuf/gen/order_service";
@@ -23,8 +24,11 @@ message GetOrderReq {
 
 //Ответ для GetOrderStatus
 message GetOrderResp {
-  string order_status = 1 [(validate.rules).string.min_len = 1];
-  string order_id = 2 [(validate.rules).string.uuid = true];
+  string order_status = 1;
+  string order_id = 2;
+  google.type.Money price = 3;
+  int64 quantity = 4;
+  string market_name = 5;
 }
 
 //Запрос для CreateOrder
@@ -32,12 +36,10 @@ message CreateOrderReq {
   string user_id = 1 [(validate.rules).string.uuid = true];
   string market_id = 2 [(validate.rules).string.uuid = true];
   OrderType order_type = 3;
-  string price = 4 [(validate.rules).string = {
-    pattern: "^\\d+(?:\\.\\d+)?$|^\\.\\d+$"
-    min_len: 1
-  }];
+  google.type.Money price = 4;
   int64 quantity = 5 [(validate.rules).int64.gte = 1];
   common.UserRole user_role = 6;
+  string indempotency_key = 7 [(validate.rules).string.min_len = 1];
 }
 
 enum OrderType {
@@ -48,16 +50,16 @@ enum OrderType {
 
 //Ответ для CreateOrder
 message CreateOrderResp {
-  string order_id = 1 [(validate.rules).string.uuid = true];
-  string order_status = 2 [(validate.rules).string.min_len = 1];
+  string order_id = 1;
+  string order_status = 2;
 }
 
 message StreamOrderUpdateReq {
-  string order_id = 1 [(validate.rules).string.min_len = 1];
+  string order_id = 1 [(validate.rules).string.uuid = true];
   string user_id = 2 [(validate.rules).string.uuid = true];
 }
 
 message StreamOrderUpdateResp {
-  string order_status = 1 [(validate.rules).string.min_len = 1];
+  string order_status = 1;
   google.protobuf.Timestamp update_status_time = 2;
 }

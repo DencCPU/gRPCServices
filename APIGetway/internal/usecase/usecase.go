@@ -30,11 +30,11 @@ type SpotClient interface {
 	ViewEnableMarkets(ctx context.Context, input spotservicedto.Input) ([]spotservicedto.Output, error)
 }
 type Service struct {
-	user_client  UserClient
-	order_client OrderClient
-	spot_client  SpotClient
-	logger       *zap.Logger
-	tracer       trace.Tracer
+	userClient  UserClient
+	orderClient OrderClient
+	spotClient  SpotClient
+	logger      *zap.Logger
+	tracer      trace.Tracer
 }
 
 func NewService(userClient UserClient, orderClient OrderClient, spotClient SpotClient, logger *zap.Logger, tracer trace.Tracer) *Service {

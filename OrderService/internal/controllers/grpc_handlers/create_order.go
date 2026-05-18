@@ -16,17 +16,13 @@ func (h *Handlers) CreateOrder(ctx context.Context, req *order.CreateOrderReq) (
 		return nil, fmt.Errorf("invalid request format:%w", err)
 	}
 
-	//Parse string to decimal
-	price, err := decimal.NewFromString(req.Price)
-	if err != nil {
-		return nil, fmt.Errorf("invalid price format:%w", err)
-	}
-
+	uints := decimal.NewFromInt(req.Price.Units)
+	nanos := decimal.NewFromInt32(req.Price.Nanos).Shift(-9)
 	newOrder := orderdomain.Order{
 		UserId:    req.UserId,
 		MarketId:  req.MarketId,
 		OrderType: orderdomain.OrderType(req.OrderType),
-		Price:     price,
+		Price:     uints.Add(nanos),
 		Quantity:  req.Quantity,
 		UserRole:  orderdomain.UserRole(req.UserRole),
 	}

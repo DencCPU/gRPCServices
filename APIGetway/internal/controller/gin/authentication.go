@@ -29,7 +29,7 @@ func (api *GinAPI) Authentication(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"accsess token": pairToken.AccessToken,
 		"refresh token": pairToken.RefreshToken,
-		"expire_at":     pairToken.Expire_at,
+		"expire_at":     pairToken.ExpireAt,
 	})
 
 }

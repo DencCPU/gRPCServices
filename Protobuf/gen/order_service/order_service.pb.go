@@ -8,6 +8,7 @@ package order_service
 
 import (
 	common "github.com/DencCPU/gRPCServices/Protobuf/gen/common"
+	money "github.com/DencCPU/gRPCServices/Protobuf/gen/money"
 	_ "github.com/envoyproxy/protoc-gen-validate/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -131,6 +132,9 @@ type GetOrderResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	OrderStatus   string                 `protobuf:"bytes,1,opt,name=order_status,json=orderStatus,proto3" json:"order_status,omitempty"`
 	OrderId       string                 `protobuf:"bytes,2,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	Price         *money.Money           `protobuf:"bytes,3,opt,name=price,proto3" json:"price,omitempty"`
+	Quantity      int64                  `protobuf:"varint,4,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	MarketName    string                 `protobuf:"bytes,5,opt,name=market_name,json=marketName,proto3" json:"market_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -179,17 +183,39 @@ func (x *GetOrderResp) GetOrderId() string {
 	return ""
 }
 
+func (x *GetOrderResp) GetPrice() *money.Money {
+	if x != nil {
+		return x.Price
+	}
+	return nil
+}
+
+func (x *GetOrderResp) GetQuantity() int64 {
+	if x != nil {
+		return x.Quantity
+	}
+	return 0
+}
+
+func (x *GetOrderResp) GetMarketName() string {
+	if x != nil {
+		return x.MarketName
+	}
+	return ""
+}
+
 // Запрос для CreateOrder
 type CreateOrderReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	MarketId      string                 `protobuf:"bytes,2,opt,name=market_id,json=marketId,proto3" json:"market_id,omitempty"`
-	OrderType     OrderType              `protobuf:"varint,3,opt,name=order_type,json=orderType,proto3,enum=order_service.v2.OrderType" json:"order_type,omitempty"`
-	Price         string                 `protobuf:"bytes,4,opt,name=price,proto3" json:"price,omitempty"`
-	Quantity      int64                  `protobuf:"varint,5,opt,name=quantity,proto3" json:"quantity,omitempty"`
-	UserRole      common.UserRole        `protobuf:"varint,6,opt,name=user_role,json=userRole,proto3,enum=common.UserRole" json:"user_role,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	UserId          string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	MarketId        string                 `protobuf:"bytes,2,opt,name=market_id,json=marketId,proto3" json:"market_id,omitempty"`
+	OrderType       OrderType              `protobuf:"varint,3,opt,name=order_type,json=orderType,proto3,enum=order_service.v2.OrderType" json:"order_type,omitempty"`
+	Price           *money.Money           `protobuf:"bytes,4,opt,name=price,proto3" json:"price,omitempty"`
+	Quantity        int64                  `protobuf:"varint,5,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	UserRole        common.UserRole        `protobuf:"varint,6,opt,name=user_role,json=userRole,proto3,enum=common.UserRole" json:"user_role,omitempty"`
+	IndempotencyKey string                 `protobuf:"bytes,7,opt,name=indempotency_key,json=indempotencyKey,proto3" json:"indempotency_key,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *CreateOrderReq) Reset() {
@@ -243,11 +269,11 @@ func (x *CreateOrderReq) GetOrderType() OrderType {
 	return OrderType_ORDER_TYPE_UNSPECIFIED
 }
 
-func (x *CreateOrderReq) GetPrice() string {
+func (x *CreateOrderReq) GetPrice() *money.Money {
 	if x != nil {
 		return x.Price
 	}
-	return ""
+	return nil
 }
 
 func (x *CreateOrderReq) GetQuantity() int64 {
@@ -262,6 +288,13 @@ func (x *CreateOrderReq) GetUserRole() common.UserRole {
 		return x.UserRole
 	}
 	return common.UserRole(0)
+}
+
+func (x *CreateOrderReq) GetIndempotencyKey() string {
+	if x != nil {
+		return x.IndempotencyKey
+	}
+	return ""
 }
 
 // Ответ для CreateOrder
@@ -425,29 +458,34 @@ var File_order_service_order_service_proto protoreflect.FileDescriptor
 
 const file_order_service_order_service_proto_rawDesc = "" +
 	"\n" +
-	"!order_service/order_service.proto\x12\x10order_service.v2\x1a\x13common/common.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17validate/validate.proto\"U\n" +
+	"!order_service/order_service.proto\x12\x10order_service.v2\x1a\x13common/common.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x11money/money.proto\x1a\x17validate/validate.proto\"U\n" +
 	"\vGetOrderReq\x12#\n" +
 	"\border_id\x18\x01 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\aorderId\x12!\n" +
-	"\auser_id\x18\x02 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\x06userId\"_\n" +
-	"\fGetOrderResp\x12*\n" +
-	"\forder_status\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\vorderStatus\x12#\n" +
-	"\border_id\x18\x02 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\aorderId\"\xa2\x02\n" +
+	"\auser_id\x18\x02 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\x06userId\"\xb3\x01\n" +
+	"\fGetOrderResp\x12!\n" +
+	"\forder_status\x18\x01 \x01(\tR\vorderStatus\x12\x19\n" +
+	"\border_id\x18\x02 \x01(\tR\aorderId\x12(\n" +
+	"\x05price\x18\x03 \x01(\v2\x12.google.type.MoneyR\x05price\x12\x1a\n" +
+	"\bquantity\x18\x04 \x01(\x03R\bquantity\x12\x1f\n" +
+	"\vmarket_name\x18\x05 \x01(\tR\n" +
+	"marketName\"\xc8\x02\n" +
 	"\x0eCreateOrderReq\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\x06userId\x12%\n" +
 	"\tmarket_id\x18\x02 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\bmarketId\x12:\n" +
 	"\n" +
-	"order_type\x18\x03 \x01(\x0e2\x1b.order_service.v2.OrderTypeR\torderType\x126\n" +
-	"\x05price\x18\x04 \x01(\tB \xfaB\x1dr\x1b\x10\x012\x17^\\d+(?:\\.\\d+)?$|^\\.\\d+$R\x05price\x12#\n" +
+	"order_type\x18\x03 \x01(\x0e2\x1b.order_service.v2.OrderTypeR\torderType\x12(\n" +
+	"\x05price\x18\x04 \x01(\v2\x12.google.type.MoneyR\x05price\x12#\n" +
 	"\bquantity\x18\x05 \x01(\x03B\a\xfaB\x04\"\x02(\x01R\bquantity\x12-\n" +
-	"\tuser_role\x18\x06 \x01(\x0e2\x10.common.UserRoleR\buserRole\"b\n" +
-	"\x0fCreateOrderResp\x12#\n" +
-	"\border_id\x18\x01 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\aorderId\x12*\n" +
-	"\forder_status\x18\x02 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\vorderStatus\"]\n" +
-	"\x14StreamOrderUpdateReq\x12\"\n" +
-	"\border_id\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\aorderId\x12!\n" +
-	"\auser_id\x18\x02 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\x06userId\"\x8d\x01\n" +
-	"\x15StreamOrderUpdateResp\x12*\n" +
-	"\forder_status\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\vorderStatus\x12H\n" +
+	"\tuser_role\x18\x06 \x01(\x0e2\x10.common.UserRoleR\buserRole\x122\n" +
+	"\x10indempotency_key\x18\a \x01(\tB\a\xfaB\x04r\x02\x10\x01R\x0findempotencyKey\"O\n" +
+	"\x0fCreateOrderResp\x12\x19\n" +
+	"\border_id\x18\x01 \x01(\tR\aorderId\x12!\n" +
+	"\forder_status\x18\x02 \x01(\tR\vorderStatus\"^\n" +
+	"\x14StreamOrderUpdateReq\x12#\n" +
+	"\border_id\x18\x01 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\aorderId\x12!\n" +
+	"\auser_id\x18\x02 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\x06userId\"\x84\x01\n" +
+	"\x15StreamOrderUpdateResp\x12!\n" +
+	"\forder_status\x18\x01 \x01(\tR\vorderStatus\x12H\n" +
 	"\x12update_status_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x10updateStatusTime*V\n" +
 	"\tOrderType\x12\x1a\n" +
 	"\x16ORDER_TYPE_UNSPECIFIED\x10\x00\x12\x15\n" +
@@ -480,24 +518,27 @@ var file_order_service_order_service_proto_goTypes = []any{
 	(*CreateOrderResp)(nil),       // 4: order_service.v2.CreateOrderResp
 	(*StreamOrderUpdateReq)(nil),  // 5: order_service.v2.StreamOrderUpdateReq
 	(*StreamOrderUpdateResp)(nil), // 6: order_service.v2.StreamOrderUpdateResp
-	(common.UserRole)(0),          // 7: common.UserRole
-	(*timestamppb.Timestamp)(nil), // 8: google.protobuf.Timestamp
+	(*money.Money)(nil),           // 7: google.type.Money
+	(common.UserRole)(0),          // 8: common.UserRole
+	(*timestamppb.Timestamp)(nil), // 9: google.protobuf.Timestamp
 }
 var file_order_service_order_service_proto_depIdxs = []int32{
-	0, // 0: order_service.v2.CreateOrderReq.order_type:type_name -> order_service.v2.OrderType
-	7, // 1: order_service.v2.CreateOrderReq.user_role:type_name -> common.UserRole
-	8, // 2: order_service.v2.StreamOrderUpdateResp.update_status_time:type_name -> google.protobuf.Timestamp
-	1, // 3: order_service.v2.OrderService.GetOrderStatus:input_type -> order_service.v2.GetOrderReq
-	3, // 4: order_service.v2.OrderService.CreateOrder:input_type -> order_service.v2.CreateOrderReq
-	5, // 5: order_service.v2.OrderService.StreamOrderUpdate:input_type -> order_service.v2.StreamOrderUpdateReq
-	2, // 6: order_service.v2.OrderService.GetOrderStatus:output_type -> order_service.v2.GetOrderResp
-	4, // 7: order_service.v2.OrderService.CreateOrder:output_type -> order_service.v2.CreateOrderResp
-	6, // 8: order_service.v2.OrderService.StreamOrderUpdate:output_type -> order_service.v2.StreamOrderUpdateResp
-	6, // [6:9] is the sub-list for method output_type
-	3, // [3:6] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	7, // 0: order_service.v2.GetOrderResp.price:type_name -> google.type.Money
+	0, // 1: order_service.v2.CreateOrderReq.order_type:type_name -> order_service.v2.OrderType
+	7, // 2: order_service.v2.CreateOrderReq.price:type_name -> google.type.Money
+	8, // 3: order_service.v2.CreateOrderReq.user_role:type_name -> common.UserRole
+	9, // 4: order_service.v2.StreamOrderUpdateResp.update_status_time:type_name -> google.protobuf.Timestamp
+	1, // 5: order_service.v2.OrderService.GetOrderStatus:input_type -> order_service.v2.GetOrderReq
+	3, // 6: order_service.v2.OrderService.CreateOrder:input_type -> order_service.v2.CreateOrderReq
+	5, // 7: order_service.v2.OrderService.StreamOrderUpdate:input_type -> order_service.v2.StreamOrderUpdateReq
+	2, // 8: order_service.v2.OrderService.GetOrderStatus:output_type -> order_service.v2.GetOrderResp
+	4, // 9: order_service.v2.OrderService.CreateOrder:output_type -> order_service.v2.CreateOrderResp
+	6, // 10: order_service.v2.OrderService.StreamOrderUpdate:output_type -> order_service.v2.StreamOrderUpdateResp
+	8, // [8:11] is the sub-list for method output_type
+	5, // [5:8] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_order_service_order_service_proto_init() }

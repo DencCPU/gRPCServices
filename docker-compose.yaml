@@ -24,13 +24,43 @@ services:
     container_name: jaeger
     ports:
       - "16686:16686"
-      - "4317:4317"
-      - "4318:4318"
+     # - "4317:4317"
+     # - "4318:4318"
 
     restart: always
     environment:
       - DEBUG=true
       - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - monitoring
+      
+  tempo:
+    image: grafana/tempo:latest
+    container_name: tempo
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./Config/tempo_config.yaml:/etc/tempo.yaml
+    ports:
+      - "3200:3200"   
+    restart: always
+    environment:
+      - DEBUG=true
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - monitoring
+  
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./Config/loki_config.yaml:/etc/loki/loki.yaml:ro   
+      - loki_data:/loki                                    
+    command: -config.file=/etc/loki/loki.yaml
+
+    restart: always
+    
     networks:
       - monitoring
 
@@ -41,7 +71,7 @@ services:
       - "9090:9090"
 
     volumes:
-      - ./prometheus.yaml:/etc/prometheus/prometheus.yaml
+      - ./Config/prometheus_config.yaml:/etc/prometheus/prometheus.yaml:ro   
       - prometheus_data:/prprometheus
       
     command:
@@ -53,14 +83,46 @@ services:
     networks:
       - monitoring
 
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./Config/collector_config.yaml:/etc/otelcol/config.yaml:ro
+
+    ports:
+      - "4317:4317" 
+      - "4318:4318" 
+
+    depends_on:
+      - jaeger
+      - prometheus
+      - loki
+      - tempo
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+    - "3000:3000"
+    environment:
+    - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+    - monitoring
+
 volumes:
   redis_data:
     driver: local
   prometheus_data:
     driver: local
+  loki_data:
     
 networks:
   monitoring:
     driver: bridge
+
 
  

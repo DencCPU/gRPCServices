@@ -1,4 +1,4 @@
-package interseptors
+package interceptors
 
 type RequestID string
 

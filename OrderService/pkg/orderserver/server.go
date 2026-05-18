@@ -5,9 +5,10 @@ import (
 	"net"
 
 	orderconfig "github.com/DencCPU/gRPCServices/OrderService/config"
-	"github.com/DencCPU/gRPCServices/Shared/interseptors"
+	"github.com/DencCPU/gRPCServices/Shared/interceptors"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/zap"
+	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
 )
 
@@ -26,11 +27,14 @@ func New(cfg orderconfig.Server, logger *zap.Logger) (*Server, error) {
 		return nil, err
 	}
 
+	limiter := rate.NewLimiter(rate.Limit(cfg.RequestPerSecondLimit), 1)
+
 	newServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			interseptors.UnaryPanicRecoveryInterceptor(logger),
-			interseptors.XRequestID,
-			interseptors.LoggerInterseptor(logger),
+			interceptors.RateLimiter(logger, limiter),
+			interceptors.UnaryPanicRecoveryInterceptor(logger),
+			interceptors.XRequestID,
+			interceptors.LoggerInterseptor(logger),
 		), grpc.StatsHandler(otelgrpc.NewServerHandler()))
 
 	return &Server{newServer, lis}, nil

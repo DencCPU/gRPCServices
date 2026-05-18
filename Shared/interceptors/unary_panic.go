@@ -1,4 +1,4 @@
-package interseptors
+package interceptors
 
 import (
 	"context"
@@ -20,7 +20,7 @@ func UnaryPanicRecoveryInterceptor(logger *zap.Logger) grpc.UnaryServerIntercept
 			if r := recover(); r != nil {
 				logger.Warn("panic recover",
 					zap.String("Method:", info.FullMethod),
-					zap.String("Стек:", string(debug.Stack())),
+					zap.String("Steck:", string(debug.Stack())),
 					zap.Any("Panic:", r),
 				)
 			}

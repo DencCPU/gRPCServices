@@ -8,11 +8,11 @@ import (
 // Функция проверяет вид ошибки(клиентская или серверная)
 func ServerError(err error) bool {
 	if err == nil {
-		return false
+		return true
 	}
 	status, ok := status.FromError(err)
 	if !ok {
-		return true //Неизыестна ошибка
+		return false //Неизыестна ошибка
 	}
 	switch status.Code() {
 	case codes.Unavailable, // сервис недоступен
@@ -20,8 +20,8 @@ func ServerError(err error) bool {
 		codes.Internal,          // внутренняя ошибка
 		codes.Unknown,           // неизвестная ошибка
 		codes.ResourceExhausted: // перегрузка
-		return true
-	default:
 		return false
+	default:
+		return true
 	}
 }

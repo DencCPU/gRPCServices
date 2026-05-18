@@ -19,10 +19,13 @@ import (
 	"github.com/DencCPU/gRPCServices/Shared/logger"
 	"github.com/DencCPU/gRPCServices/Shared/opentelemetry"
 	"github.com/sony/gobreaker"
+	"go.opentelemetry.io/contrib/bridges/otelzap"
+	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 // Add logger
@@ -65,13 +68,10 @@ func ConfigModul() fx.Option {
 					entryapiservice.PathToConfig,
 				)
 			},
-			func(loader *config.ConfigLoader, logger *zap.Logger) (*apiconfig.Config, error) {
+			func(loader *config.ConfigLoader) (*apiconfig.Config, error) {
 				cfg, err := config.NewConfig[apiconfig.Config](loader)
 				if err != nil {
-					logger.Error("error getting new config:",
-						zap.Error(err),
-					)
-					return nil, err
+					return nil, fmt.Errorf("error getting new config:%w", err)
 				}
 				return cfg, nil
 			},
@@ -158,14 +158,22 @@ func TracerModule() fx.Option {
 		fx.Provide(
 			func(logger *zap.Logger, cfg *apiconfig.Config) (*sdktrace.TracerProvider, trace.Tracer, error) {
 				ctx := context.Background()
-				tracerProvider, err := opentelemetry.NewHttpTracer(ctx, "APIGetway", cfg.Jaeger.Host, cfg.Jaeger.Port)
+
+				tracerProvider, err := opentelemetry.NewTracerProviderHttp(
+					ctx,
+					"API/getway",
+					cfg.OtelCollector.Host,
+					cfg.OtelCollector.Port,
+					cfg.OtelCollector.TracePercentage,
+				)
+
 				if err != nil {
 					logger.Error("tracer startup error:",
 						zap.Error(err),
 					)
 					return nil, nil, err
 				}
-				trace := tracerProvider.Tracer("APIGetway")
+				trace := tracerProvider.Tracer("API/getway")
 				return tracerProvider, trace, nil
 			},
 		),
@@ -179,6 +187,83 @@ func TracerModule() fx.Option {
 						},
 					},
 				)
+			},
+		),
+	)
+}
+
+// Add metric
+func MetricModul() fx.Option {
+	return fx.Options(
+		fx.Provide(
+			func(logger *zap.Logger, cfg *apiconfig.Config) (*sdkmetric.MeterProvider, error) {
+
+				provider, err := opentelemetry.NewMetricProviderHttp(
+					context.Background(),
+					"API/getway",
+					cfg.OtelCollector.Host,
+					cfg.OtelCollector.Port,
+					cfg.OtelCollector.MetricInterval,
+				)
+				if err != nil {
+					logger.Error("error initialization metric:",
+						zap.Error(err))
+					return nil, err
+				}
+				return provider, err
+			},
+		),
+		fx.Invoke(
+			func(lc fx.Lifecycle, logger *zap.Logger, metric *sdkmetric.MeterProvider) {
+				lc.Append(fx.Hook{
+					OnStop: func(ctx context.Context) error {
+						metric.Shutdown(ctx)
+						logger.Info("Metric stoped")
+						return nil
+					},
+				})
+			},
+		),
+	)
+}
+
+// Add otelLogger
+func OtelLogger() fx.Option {
+	return fx.Options(fx.Provide(
+		func(cfg *apiconfig.Config) (*zap.Logger, error) {
+			logger, err := logger.NewLogger()
+			if err != nil {
+				return nil, fmt.Errorf("zap logger initialition error:%w", err)
+			}
+
+			loggerProvider, err := opentelemetry.NewLoggerProviderHttp(
+				context.Background(),
+				"API/getway",
+				cfg.OtelCollector.Host,
+				cfg.OtelCollector.Port)
+
+			if err != nil {
+				logger.Error("logger provider initialization error",
+					zap.Error(err),
+				)
+				return nil, err
+
+			}
+			otlpCore := otelzap.NewCore("API/getway", otelzap.WithLoggerProvider(loggerProvider))
+			teeCore := zapcore.NewTee(logger.Core(), otlpCore)
+			otlpLogger := zap.New(teeCore, zap.WithCaller(true))
+
+			return otlpLogger, nil
+		},
+	),
+		fx.Invoke(
+			func(lc fx.Lifecycle, logger *zap.Logger) {
+				lc.Append(fx.Hook{
+					OnStop: func(ctx context.Context) error {
+						_ = logger.Sync()
+						return nil
+					},
+				})
 			},
 		),
 	)
@@ -219,14 +304,18 @@ func ServerModule() fx.Option {
 				}
 				lc.Append(fx.Hook{
 					OnStart: func(ctx context.Context) error {
-						logger.Info("Server is running on port:8082")
-						err := srv.ListenAndServe()
-						if err != nil {
-							logger.Error("server error:",
-								zap.Error(err),
-							)
-							return err
-						}
+						info := fmt.Sprintf("Server is running on port:%d", cfg.Server.Port)
+						logger.Info(info)
+
+						go func() {
+							err := srv.ListenAndServe()
+							if err != nil {
+								logger.Error("server error:",
+									zap.Error(err),
+								)
+							}
+						}()
+
 						return nil
 					},
 					OnStop: func(ctx context.Context) error {
@@ -244,13 +333,15 @@ func ServerModule() fx.Option {
 
 func FxAppRunner() (*fx.App, error) {
 	app := fx.New(
-		LoggerModul(),
+		// LoggerModul(),
+		OtelLogger(),
 		ConfigModul(),
 		BreakerModule(),
 		SpotClientModul(),
 		OrderClientModul(),
 		UserClientModule(),
 		TracerModule(),
+		MetricModul(),
 		ServiceModule(),
 		HandlersModule(),
 		ServerModule(),

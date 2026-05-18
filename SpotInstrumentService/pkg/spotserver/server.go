@@ -4,11 +4,12 @@ import (
 	"net"
 	"time"
 
-	"github.com/DencCPU/gRPCServices/Shared/interseptors"
+	"github.com/DencCPU/gRPCServices/Shared/interceptors"
 	spotconfig "github.com/DencCPU/gRPCServices/SpotInstrumentService/config"
 	redisadapter "github.com/DencCPU/gRPCServices/SpotInstrumentService/internal/adapters/redis"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/zap"
+	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
 )
 
@@ -29,12 +30,15 @@ func New(redis *redisadapter.RedisDB, cfg spotconfig.Server, logger *zap.Logger)
 		return nil, err
 	}
 
+	limiter := rate.NewLimiter(rate.Limit(cfg.RequestPerSecondLimit), 1)
+
 	//Регистрация интерсепторов на сервере
 	newServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			interseptors.UnaryPanicRecoveryInterceptor(logger),
-			interseptors.XRequestID,
-			interseptors.LoggerInterseptor(logger),
+			interceptors.RateLimiter(logger, limiter),
+			interceptors.UnaryPanicRecoveryInterceptor(logger),
+			interceptors.XRequestID,
+			interceptors.LoggerInterseptor(logger),
 			redisadapter.RedisCacheInterceptor(redis, 10*time.Minute),
 		),
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),

@@ -6,19 +6,30 @@ import (
 	orderdomain "github.com/DencCPU/gRPCServices/OrderService/internal/domain/order"
 )
 
-func (p *PostgresDB) GetOrderState(ctx context.Context, key orderdomain.Key) (string, error) {
-	var status string
+func (p *PostgresDB) GetOrderState(ctx context.Context, key orderdomain.Key) (orderdomain.ReceivedOrderInfo, error) {
+	var orderInfo orderdomain.ReceivedOrderInfo
 
-	err := p.QueryRow(ctx, `
-	SELECT status 
+	err := p.db.QueryRow(ctx, `
+	SELECT 
+	status,
+	price,
+	quantity,
+	markets.name 
 	FROM orders
-	JOIN users ON orders.user_id = users.id
-	JOIN orders_id ON orders.order_id = orders_id.id
+	INNER JOIN users ON orders.user_id = users.id
+	INNER JOIN orders_id ON orders.order_id = orders_id.id
+	INNER JOIN markets ON orders.market_id = markets.id
 	WHERE users.user_id = $1
 	AND orders_id.order_id = $2
-`, key.UserId, key.OrderId).Scan(&status)
+`, key.UserId, key.OrderId).
+		Scan(
+			&orderInfo.Status,
+			&orderInfo.Price,
+			&orderInfo.Quantity,
+			&orderInfo.MarketName)
 	if err != nil {
-		return "", err
+		return orderdomain.ReceivedOrderInfo{}, err
 	}
-	return status, nil
+	orderInfo.OrderId = key.OrderId
+	return orderInfo, nil
 }

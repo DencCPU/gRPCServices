@@ -9,10 +9,10 @@ const (
 )
 
 type OrderInfo struct {
-	UserId     string `json:"user_id"`
-	MarketId   string `json:"market_id"`
-	Order_type string `json:"order_type"`
-	Price      string `json:"price"`
-	Quantity   int64  `json:"quantity"`
-	UserRole   UserRole
+	UserId    string `json:"user_id"`
+	MarketId  string `json:"market_id"`
+	OrderType string `json:"order_type"`
+	Price     string `json:"price"`
+	Quantity  int64  `json:"quantity"`
+	UserRole  UserRole
 }

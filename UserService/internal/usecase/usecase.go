@@ -25,10 +25,10 @@ type JWT interface {
 }
 
 type Service struct {
-	Storage
-	JWT
-	logger *zap.Logger
-	tracer trace.Tracer
+	storage Storage
+	jwt     JWT
+	logger  *zap.Logger
+	tracer  trace.Tracer
 }
 
 func NewService(storage Storage, logger *zap.Logger, jwt JWT, tracer trace.Tracer) *Service {

@@ -3,6 +3,7 @@ package notify
 import (
 	"context"
 	"sync"
+	"time"
 
 	orderdomain "github.com/DencCPU/gRPCServices/OrderService/internal/domain/order"
 )
@@ -14,6 +15,8 @@ func (s *StatusStorage) UpdateStatusSubs(ctx context.Context, key orderdomain.Ke
 	go func() {
 		defer wg.Done()
 		var laststatus string
+		tiker := time.NewTicker(s.TikerInterval)
+		defer tiker.Stop()
 
 		for {
 			select {
@@ -23,7 +26,7 @@ func (s *StatusStorage) UpdateStatusSubs(ctx context.Context, key orderdomain.Ke
 				}
 				return
 
-			default:
+			case <-tiker.C:
 				status := s.GetStatus(key)
 				if laststatus != status {
 

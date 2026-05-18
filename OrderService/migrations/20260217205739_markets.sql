@@ -12,3 +12,4 @@ created_at TIMESTAMPTZ NOT NULL
 -- +goose StatementBegin
 DROP TABLE IF EXISTS markets;
 -- +goose StatementEnd
+

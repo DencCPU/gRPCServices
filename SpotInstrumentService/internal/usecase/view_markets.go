@@ -7,6 +7,8 @@ import (
 	spoterrors "github.com/DencCPU/gRPCServices/SpotInstrumentService/internal/domain/errors"
 	domainmarket "github.com/DencCPU/gRPCServices/SpotInstrumentService/internal/domain/market"
 	domainusers "github.com/DencCPU/gRPCServices/SpotInstrumentService/internal/domain/users"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"go.uber.org/zap"
 )
 
@@ -15,20 +17,27 @@ func (s *SpotService) ViewMarket(ctx context.Context, input domainusers.Input) (
 
 	var enableMarkets []*domainmarket.Market
 
-	ctx, span := s.tracer.Start(ctx, "view markets")
+	ctx, span := s.tracer.Start(ctx, "View markets")
 	defer span.End()
-
+	span.SetAttributes(
+		attribute.String("userID", input.UserId),
+		attribute.Int("PageSize", input.PageSize),
+		attribute.String("PageToken", input.PageToken),
+	)
 	enableMarkets, pageToken := s.GetEnableMarkets(input)
 
 	if len(enableMarkets) == 0 {
 		s.logger.Error("no markets available")
+		span.RecordError(spoterrors.Avalible_markets)
+		span.SetStatus(codes.Error, "no markets available")
 		return nil, "", spoterrors.Avalible_markets
+
 	}
 
 	s.logger.Info("List of available markets received",
 		zap.String("spanID:", span.SpanContext().SpanID().String()),
 	)
-
+	span.SetStatus(codes.Ok, "view markets successfuly")
 	return Mapper(enableMarkets), pageToken, nil
 }
 

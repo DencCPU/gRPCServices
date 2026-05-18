@@ -46,7 +46,7 @@ func (api *GinAPI) Middleware() gin.HandlerFunc {
 
 				c.Header("new-access-token", pairToken.AccessToken)
 				c.Header("new-refresh-token", pairToken.RefreshToken)
-				c.Header("new-expire_at", pairToken.Expire_at.Format(layout))
+				c.Header("new-expire_at", pairToken.ExpireAt.Format(layout))
 
 				user, err = api.service.Validation(c.Request.Context(), pairToken.AccessToken)
 				if err != nil {

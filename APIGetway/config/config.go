@@ -1,9 +1,11 @@
 package apiconfig
 
+import "time"
+
 type Config struct {
 	Server         Server         `mapstructure:"server"`
-	BreakerSetting BreakerSetting `mapsstructure:"breakersetting"`
-	Jaeger         Jaeger         `mapsstructure:"jaeger"`
+	BreakerSetting BreakerSetting `mapstructure:"breakersetting"`
+	OtelCollector  OtelCollector  `mapstructure:"collector"`
 }
 
 type Server struct {
@@ -13,14 +15,16 @@ type Server struct {
 }
 
 type BreakerSetting struct {
-	Name           string `mapstructure:"name"`             //Название брейкера
-	MaxRequests    uint32 `mapstructure:"max_request"`      //Максимально кол-во запросов, пропускаемых в полуоткрытом режиме(Half-open)
-	Interval       uint   `mapstructure:"interval"`         //Период сброса статистики подсчета неудачных запросов в закрытом режиме(Close). Время в секундах.
-	Timeout        uint   `mapstructure:"timeout"`          //Время прибывания брейкера в открытом состоянии, перед переходов в Half-open.
-	MaxFailRequest uint32 `mapstructure:"max_fail_request"` //Количество неудачных запросов, после которого брейкер перейдет в состояние Open
+	Name           string        `mapstructure:"name"`             //Название брейкера
+	MaxRequests    uint32        `mapstructure:"max_request"`      //Максимально кол-во запросов, пропускаемых в полуоткрытом режиме(Half-open)
+	Interval       time.Duration `mapstructure:"interval"`         //Период сброса статистики подсчета неудачных запросов в закрытом режиме(Close). Время в секундах.
+	Timeout        time.Duration `mapstructure:"timeout"`          //Время прибывания брейкера в открытом состоянии, перед переходов в Half-open.
+	MaxFailRequest uint32        `mapstructure:"max_fail_request"` //Количество неудачных запросов, после которого брейкер перейдет в состояние Open
 }
 
-type Jaeger struct {
-	Host string `mapstructure:"host"`
-	Port string `mapstructure:"port"`
+type OtelCollector struct {
+	Host            string        `mapstructure:"host"`
+	Port            string        `mapstructure:"port"`
+	TracePercentage int           `mapstructure:"trace_percentage"`
+	MetricInterval  time.Duration `mapstructure:"metric_interval"`
 }

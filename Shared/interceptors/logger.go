@@ -1,4 +1,4 @@
-package interseptors
+package interceptors
 
 import (
 	"context"

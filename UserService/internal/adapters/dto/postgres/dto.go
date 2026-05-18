@@ -3,7 +3,6 @@ package postgresdto
 import (
 	"time"
 
-	userhash "github.com/DencCPU/gRPCServices/UserService/internal/adapters/hash"
 	"github.com/google/uuid"
 )
 
@@ -17,9 +16,9 @@ type UserDTO struct {
 }
 
 type UpdatePassword struct {
-	Email     string
-	Password  string
-	Update_at time.Time
+	Email    string
+	Password string
+	UpdateAt time.Time
 }
 
 type RefreshToken struct {
@@ -36,16 +35,12 @@ type AuthUser struct {
 	Role string
 }
 
-func NewUserDTO(name, email, password, role string) (*UserDTO, error) {
-	hashPassword, err := userhash.HashPassword(password)
-	if err != nil {
-		return nil, err
-	}
+func NewUserDTO(name, email, role string) (*UserDTO, error) {
+
 	dto := UserDTO{
-		Name:         name,
-		Email:        email,
-		HashPassword: hashPassword,
-		Role:         role,
+		Name:  name,
+		Email: email,
+		Role:  role,
 	}
 	return &dto, nil
 }

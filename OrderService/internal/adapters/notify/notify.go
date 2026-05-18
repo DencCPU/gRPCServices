@@ -2,18 +2,25 @@ package notify
 
 import (
 	"sync"
+	"time"
 
 	orderdomain "github.com/DencCPU/gRPCServices/OrderService/internal/domain/order"
 )
 
 type StatusStorage struct {
-	Status map[orderdomain.Key]string
-	Subs   map[orderdomain.Key][]chan string
-	mu     sync.Mutex
+	Status        map[orderdomain.Key]string
+	Subs          map[orderdomain.Key][]chan string
+	TikerInterval time.Duration
+	mu            sync.RWMutex
 }
 
-func NewStatStorage() *StatusStorage {
-	return &StatusStorage{Status: make(map[orderdomain.Key]string), Subs: make(map[orderdomain.Key][]chan string)}
+func NewStatStorage(interval time.Duration) *StatusStorage {
+	return &StatusStorage{
+		Status:        make(map[orderdomain.Key]string),
+		Subs:          make(map[orderdomain.Key][]chan string),
+		TikerInterval: interval,
+	}
+
 }
 
 func (s *StatusStorage) GetNumbersSubsChan(key orderdomain.Key) int {

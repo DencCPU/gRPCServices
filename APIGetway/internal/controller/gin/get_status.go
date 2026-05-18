@@ -42,6 +42,9 @@ func (api *GinAPI) GetOrderStatus(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"order_id":     output.OrderId,
-		"order_status": output.OrderStatus,
+		"order_status": output.Status,
+		"price":        output.Price,
+		"quantity":     output.Quantity,
+		"market_name":  output.MarketName,
 	})
 }

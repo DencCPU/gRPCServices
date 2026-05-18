@@ -15,17 +15,19 @@ type RedisDB struct {
 
 func NewRedis(ctx context.Context, cfg spotconfig.Redis) (*RedisDB, error) {
 
-	//Формирование строки подключения
 	addr := fmt.Sprintf("%s:%s", cfg.Host, cfg.Port)
 
-	//Инициализация нового Redis клиента
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     addr,
-		Password: cfg.Password,
-		DB:       cfg.DB,
+		Addr:         addr,
+		Password:     cfg.Password,
+		DB:           cfg.DB,
+		PoolSize:     cfg.PoolSize,
+		MinIdleConns: cfg.MinIdleConns,
+		DialTimeout:  cfg.DialTimeout,
+		ReadTimeout:  cfg.ReadTimeout,
+		WriteTimeout: cfg.WriteTimeout,
 	})
 
-	//Проверка подключения к БД redis
 	if err := rdb.Ping(ctx).Err(); err != nil {
 		return nil, err
 	}

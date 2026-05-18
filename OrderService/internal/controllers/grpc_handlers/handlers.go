@@ -10,7 +10,7 @@ import (
 
 type Service interface {
 	CreateOrder(ctx context.Context, newOrder orderdomain.Order) (orderID string, orderStatus string, err error)
-	GetStatus(ctx context.Context, key orderdomain.Key) (orderStatus string, err error)
+	GetStatus(ctx context.Context, key orderdomain.Key) (orderInfo orderdomain.ReceivedOrderInfo, err error)
 	StreamGetState(ctx context.Context, key orderdomain.Key) (stateChan chan string, err error)
 }
 

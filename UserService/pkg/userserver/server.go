@@ -3,10 +3,11 @@ package userserver
 import (
 	"net"
 
-	"github.com/DencCPU/gRPCServices/Shared/interseptors"
+	"github.com/DencCPU/gRPCServices/Shared/interceptors"
 	userconfig "github.com/DencCPU/gRPCServices/UserService/config"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/zap"
+	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
 )
 
@@ -16,20 +17,21 @@ type Server struct {
 }
 
 func NewServer(cfg userconfig.Server, logger *zap.Logger) (*Server, error) {
-	//Инициализация интерфеса listener
+
 	host := cfg.Host
 	port := cfg.Port
 	lis, err := net.Listen(cfg.Network, host+":"+port)
 	if err != nil {
 		return nil, err
 	}
-
-	//Регистрация интерсепторов на сервере
+	limiter := rate.NewLimiter(rate.Limit(cfg.RequestPerSecondLimit), 1)
+	//Interceptors
 	newServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			interseptors.UnaryPanicRecoveryInterceptor(logger),
-			interseptors.XRequestID,
-			interseptors.LoggerInterseptor(logger),
+			interceptors.RateLimiter(logger, limiter),
+			interceptors.UnaryPanicRecoveryInterceptor(logger),
+			interceptors.XRequestID,
+			interceptors.LoggerInterseptor(logger),
 		),
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 	)

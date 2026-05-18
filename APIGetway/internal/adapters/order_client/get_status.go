@@ -7,6 +7,7 @@ import (
 
 	orderdto "github.com/DencCPU/gRPCServices/APIGetway/internal/adapters/dto/order_service"
 	"github.com/DencCPU/gRPCServices/Protobuf/gen/order_service"
+	"github.com/shopspring/decimal"
 	"github.com/sony/gobreaker"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -40,10 +41,18 @@ func (c *Client) GetStatus(ctx context.Context, input orderdto.GetInput) (orderd
 	if !ok {
 		return orderdto.GetOutput{}, fmt.Errorf("Inappropriate result type:%T", result)
 	}
+	uints := decimal.NewFromInt(resp.Price.Units)
+	nanos := decimal.NewFromInt32(resp.Price.Nanos).Shift(-9)
+
+	p := uints.Add(nanos)
+	price := p.String()
 
 	output := orderdto.GetOutput{
-		OrderId:     resp.OrderId,
-		OrderStatus: resp.OrderStatus,
+		Status:     resp.OrderStatus,
+		OrderId:    resp.OrderId,
+		Price:      price,
+		Quantity:   resp.Quantity,
+		MarketName: resp.MarketName,
 	}
 	return output, nil
 }

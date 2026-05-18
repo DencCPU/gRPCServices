@@ -3,8 +3,6 @@ package apprunner
 import (
 	"context"
 	"fmt"
-	"net/http"
-	"time"
 
 	spot "github.com/DencCPU/gRPCServices/Protobuf/gen/spot_service"
 	"github.com/DencCPU/gRPCServices/Shared/config"
@@ -17,7 +15,7 @@ import (
 	spothandlers "github.com/DencCPU/gRPCServices/SpotInstrumentService/internal/controllers/grpc_handlers"
 	"github.com/DencCPU/gRPCServices/SpotInstrumentService/internal/usecase"
 	grpcserver "github.com/DencCPU/gRPCServices/SpotInstrumentService/pkg/spotserver"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.opentelemetry.io/contrib/bridges/otelzap"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
@@ -25,9 +23,10 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-// Подкючение логгера
+// Add logger
 func LoggerModul() fx.Option {
 	return fx.Options(
 		fx.Provide(
@@ -52,7 +51,7 @@ func LoggerModul() fx.Option {
 	)
 }
 
-// Подключение In-memory хранилища
+// Add in-memory storage
 func StorageModul() fx.Option {
 	return fx.Options(
 		fx.Provide(
@@ -80,14 +79,14 @@ func StorageModul() fx.Option {
 			},
 		),
 		fx.Invoke(
-			func(lc fx.Lifecycle, logger *zap.Logger, storage *memory.Storage) {
+			func(lc fx.Lifecycle, logger *zap.Logger, storage *memory.Storage, cfg *spotconfig.Config) {
 				lc.Append(fx.Hook{
 					OnStart: func(ctx context.Context) error {
 						go func() {
-							//Создание контекста для времени управления состояниями рынков
-							ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+
+							ctx, cancel := context.WithTimeout(context.Background(), cfg.Storage.Timeout)
 							defer cancel()
-							msg := storage.AccessControl(ctx) //Запуск управления рынками
+							msg := storage.AccessControl(ctx)
 							logger.Info(msg)
 						}()
 						return nil
@@ -98,7 +97,7 @@ func StorageModul() fx.Option {
 	)
 }
 
-// Получение конфига
+// Add config module
 func NewConfigModul() fx.Option {
 	return fx.Provide(
 		func() *config.ConfigLoader {
@@ -111,24 +110,21 @@ func NewConfigModul() fx.Option {
 			)
 			return loader
 		},
-		func(loader *config.ConfigLoader, logger *zap.Logger) (*spotconfig.Config, error) {
+		func(loader *config.ConfigLoader) (*spotconfig.Config, error) {
 			config, err := config.NewConfig[spotconfig.Config](loader)
 			if err != nil {
-				logger.Error("error getting config:",
-					zap.Error(err),
-				)
-				return nil, err
+				return nil, fmt.Errorf("error getting config:%w", err)
 			}
 			return config, nil
 		},
 	)
 }
 
-// Подключение redis-кэш
+// Add redis
 func RedisModule() fx.Option {
 	return fx.Provide(
 		func(config *spotconfig.Config, logger *zap.Logger) (*redisadapter.RedisDB, error) {
-			rctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			rctx, cancel := context.WithTimeout(context.Background(), config.Redis.Timeout)
 			defer cancel()
 			redis, err := redisadapter.NewRedis(rctx, config.Redis)
 			if err != nil {
@@ -141,7 +137,7 @@ func RedisModule() fx.Option {
 	)
 }
 
-// Подключение трейсера
+// Add tracer
 func TracingModule() fx.Option {
 	return fx.Options(
 		fx.Provide(
@@ -150,13 +146,20 @@ func TracingModule() fx.Option {
 					propagation.TraceContext{},
 					propagation.Baggage{},
 				))
-				trace, err := opentelemetry.NewGrpcTracer(context.Background(), "spotService", config.Jaeger.Host, config.Jaeger.Port)
+				trace, err := opentelemetry.NewTracerProviderGrpc(
+					context.Background(),
+					"Spot/service",
+					config.OtelCollector.Host,
+					config.OtelCollector.Port,
+					config.OtelCollector.TracePercentage,
+				)
+
 				if err != nil {
 					logger.Error("tracer initialization error:",
 						zap.Error(err))
 					return nil, nil, err
 				}
-				tracer := trace.Tracer("SpotService")
+				tracer := trace.Tracer("spot/service")
 				return trace, tracer, nil
 			},
 		),
@@ -172,40 +175,34 @@ func TracingModule() fx.Option {
 	)
 }
 
-// Подключение метрик
+// Add metrics
 func MetricModul() fx.Option {
 	return fx.Options(
 		fx.Provide(
-			func(logger *zap.Logger) (*sdkmetric.MeterProvider, error) {
-				provider, err := opentelemetry.NewMetricPrometeus(context.Background(), "SpotService")
+			func(logger *zap.Logger, cfg *spotconfig.Config) (*sdkmetric.MeterProvider, error) {
+
+				provider, err := opentelemetry.NewMetricProviderGrpc(
+					context.Background(),
+					"Spot/service",
+					cfg.OtelCollector.Host,
+					cfg.OtelCollector.Port,
+					cfg.OtelCollector.MetricInterval,
+				)
 				if err != nil {
-					logger.Error("metrics initialization error:",
+					logger.Error("error initialization metric:",
 						zap.Error(err))
 					return nil, err
 				}
-
 				return provider, err
 			},
 		),
 		fx.Invoke(
-			func(lc fx.Lifecycle, logger *zap.Logger, provider *sdkmetric.MeterProvider) {
+			func(lc fx.Lifecycle, logger *zap.Logger, metric *sdkmetric.MeterProvider) {
 				lc.Append(fx.Hook{
-					OnStart: func(ctx context.Context) error {
-						go func() {
-							http.Handle("/metrics", promhttp.Handler())
-							logger.Info("The metrics server has been launched on port 9464...")
-							err := http.ListenAndServe(":9464", nil)
-							if err != nil {
-								logger.Error("server error for metrics:",
-									zap.Error(err),
-								)
-							}
-						}()
-						return nil
-					},
 					OnStop: func(ctx context.Context) error {
-
-						return provider.Shutdown(ctx)
+						metric.Shutdown(ctx)
+						logger.Info("Metric stoped")
+						return nil
 					},
 				})
 			},
@@ -213,7 +210,49 @@ func MetricModul() fx.Option {
 	)
 }
 
-// Подключение сервиса обработки
+// OtelLogger
+func OtelLogger() fx.Option {
+	return fx.Options(fx.Provide(
+		func(cfg *spotconfig.Config) (*zap.Logger, error) {
+			logger, err := logger.NewLogger()
+			if err != nil {
+				return nil, fmt.Errorf("zap logger initialition error:%w", err)
+			}
+
+			loggerProvider, err := opentelemetry.NewLoggerProviderGrpc(
+				context.Background(),
+				"Spot/service",
+				cfg.OtelCollector.Host,
+				cfg.OtelCollector.Port)
+
+			if err != nil {
+				logger.Error("logger provider initialization error",
+					zap.Error(err),
+				)
+				return nil, err
+
+			}
+			otlpCore := otelzap.NewCore("Spot/service", otelzap.WithLoggerProvider(loggerProvider))
+			teeCore := zapcore.NewTee(logger.Core(), otlpCore)
+			otlpLogger := zap.New(teeCore, zap.WithCaller(true))
+
+			return otlpLogger, nil
+		},
+	),
+		fx.Invoke(
+			func(lc fx.Lifecycle, logger *zap.Logger) {
+				lc.Append(fx.Hook{
+					OnStop: func(ctx context.Context) error {
+						_ = logger.Sync()
+						return nil
+					},
+				})
+			},
+		),
+	)
+}
+
+// Add processing service
 func ServiceModule() fx.Option {
 	return fx.Provide(
 		func(storage *memory.Storage, logger *zap.Logger, trace trace.Tracer) *usecase.SpotService {
@@ -222,7 +261,7 @@ func ServiceModule() fx.Option {
 	)
 }
 
-// Подключение обработчиков
+// Add handlers
 func HandlersModule() fx.Option {
 	return fx.Provide(
 		func(service *usecase.SpotService) *spothandlers.Handlers {
@@ -231,7 +270,7 @@ func HandlersModule() fx.Option {
 	)
 }
 
-// Создание gRPC сервера
+// Add gRPC-server
 func GrpcModule() fx.Option {
 	return fx.Options(
 		fx.Provide(
@@ -248,14 +287,15 @@ func GrpcModule() fx.Option {
 		),
 
 		fx.Invoke(
-			func(lc fx.Lifecycle, server *grpcserver.Server, handlers *spothandlers.Handlers, logger *zap.Logger) {
-				//Регистрация grpc методов в сервере
+			func(lc fx.Lifecycle, server *grpcserver.Server, handlers *spothandlers.Handlers, logger *zap.Logger, config *spotconfig.Config) {
+
 				spot.RegisterSpotInstrumentServiceServer(server, handlers)
 
 				lc.Append(fx.Hook{
 					OnStart: func(ctx context.Context) error {
 						go func() {
-							logger.Info("Server start on port 8080...")
+							info := fmt.Sprintf("Server start on port:%s", config.Server.Port)
+							logger.Info(info)
 							err := server.Serve(server.Listener)
 							if err != nil {
 								logger.Error("error working server:",
@@ -290,12 +330,13 @@ func GrpcModule() fx.Option {
 
 func FxAppRunner() (*fx.App, error) {
 	app := fx.New(
-		LoggerModul(),
+		// LoggerModul(),
 		StorageModul(),
 		NewConfigModul(),
 		RedisModule(),
 		TracingModule(),
 		MetricModul(),
+		OtelLogger(),
 		ServiceModule(),
 		HandlersModule(),
 		GrpcModule(),

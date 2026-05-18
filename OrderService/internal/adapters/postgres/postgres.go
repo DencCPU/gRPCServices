@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	orderconfig "github.com/DencCPU/gRPCServices/OrderService/config"
 	orderdomain "github.com/DencCPU/gRPCServices/OrderService/internal/domain/order"
@@ -15,9 +16,12 @@ type Notify interface {
 }
 
 type PostgresDB struct {
-	*pgxpool.Pool
-	Notify
+	db               *pgxpool.Pool
+	notify           Notify
 	controlOrderChan chan orderdomain.OrderInfo
+	idempotecyCache  map[string]time.Time
+	cacheTTL         time.Duration
+	cacheMu          sync.RWMutex
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -35,20 +39,34 @@ func NewDB(ctx context.Context, cfg orderconfig.Postgres, notify Notify) (*Postg
 		cfg.Name,
 		cfg.Sslmode,
 	)
-	fmt.Println(dsn)
-	db, err := pgxpool.New(ctx, dsn)
+	dataBase, err := pgxpool.New(ctx, dsn)
 	if err != nil {
-		return nil, fmt.Errorf("postgres database is unavailable:%w", err) //Нужно ли эту ошибку отнести в доменную область?
+		return nil, fmt.Errorf("postgres database is unavailable:%w", err)
 	}
 
-	// Проверка соединения
-	conn, err := db.Acquire(ctx)
+	// Connection check
+	conn, err := dataBase.Acquire(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("cannot acquire connection from pool:%w", err)
 	}
 	defer conn.Release()
 
 	dbCtx, dbCancel := context.WithCancel(ctx)
+	postgres := PostgresDB{}
+	postgres.cacheTTL = cfg.IdempotencyCacheTTL
+	fmt.Println("TTL:", postgres.cacheTTL)
+	return &PostgresDB{
+		db:               dataBase,
+		notify:           notify,
+		controlOrderChan: make(chan orderdomain.OrderInfo, cfg.ControlChanSize),
+		idempotecyCache:  map[string]time.Time{},
+		cacheTTL:         cfg.IdempotencyCacheTTL,
+		cacheMu:          sync.RWMutex{},
+		ctx:              dbCtx,
+		cancel:           dbCancel,
+		wg:               sync.WaitGroup{}}, nil
+}
 
-	return &PostgresDB{db, notify, make(chan orderdomain.OrderInfo, cfg.ControlChanSize), dbCtx, dbCancel, sync.WaitGroup{}}, nil
+func (p *PostgresDB) GetPgxPool() *pgxpool.Pool {
+	return p.db
 }

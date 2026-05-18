@@ -2,7 +2,8 @@ server:
   port: 
   host: 
   network: "tcp"
-
+  request_per_second_limit: 100
+  
 postgres:
   host: 
   port: 
@@ -15,6 +16,8 @@ jwt:
   secret:
   ttl: 60
 
-jaeger:
-  host: 
-  port: 
+collector:
+  host:
+  port:
+  trace_percentage: 100
+  metric_interval: 1s

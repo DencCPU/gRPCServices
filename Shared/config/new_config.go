@@ -47,7 +47,6 @@ func NewConfig[T any](loader *ConfigLoader) (*T, error) {
 	if err := configViper.Unmarshal(&cfg); err != nil {
 		return nil, err
 	}
-
 	return &cfg, nil
 }
 

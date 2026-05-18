@@ -5,15 +5,15 @@ package spot_service.v2;
 import "common/common.proto";
 import "validate/validate.proto";
 
-option go_package = "github.com/DenсCPU/gRPCServices/Protobuf/gen/spot_service"; //Нужно ли указывать версию (spot_service/v2)???
+option go_package = "github.com/DenсCPU/gRPCServices/Protobuf/gen/spot_service";
 
 //Предоставления данных о рынках
 service SpotInstrumentService {
-  rpc ViewMarket(ViewReq) returns (ViewResp);
+  rpc ViewMarket(ViewMarketReq) returns (ViewMarketResp);
 }
 
 //Запрос для ViewMarket
-message ViewReq {
+message ViewMarketReq {
   common.UserRole user_roles = 1;
   string user_id = 2 [(validate.rules).string.uuid = true];
   int32 page_size = 3 [(validate.rules).int32 = {
@@ -24,9 +24,9 @@ message ViewReq {
 }
 
 //Ответ для ViewMarket
-message ViewResp {
+message ViewMarketResp {
   repeated Markets enable_markets = 1;
-  string page_token = 2;
+  string next_page_token = 2;
 }
 
 message Markets {

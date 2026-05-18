@@ -20,10 +20,15 @@ func (p *PostgresDB) AddUser(ctx context.Context, newUser domainuser.User) (stri
 	}
 
 	//Create New DTO
-	dto, err := postgresdto.NewUserDTO(newUser.Name, newUser.Email, newUser.Password, newUser.Role)
+	dto, err := postgresdto.NewUserDTO(newUser.Name, newUser.Email, newUser.Role)
 	if err != nil {
 		return "", "", err
 	}
+	hashPassword, err := userhash.HashPassword(newUser.Password)
+	if err != nil {
+		return "", "", err
+	}
+	dto.HashPassword = hashPassword
 	dto.CreatedAt = time.Now()
 
 	//Adding a new record to the database
@@ -59,7 +64,7 @@ func (p *PostgresDB) AddUser(ctx context.Context, newUser domainuser.User) (stri
 // Update password
 func (p *PostgresDB) UpdatePassword(ctx context.Context, email, password string) error {
 	dto := postgresdto.NewUpdatePassord(email, password)
-	dto.Update_at = time.Now()
+	dto.UpdateAt = time.Now()
 
 	_, err := p.Exec(ctx, `
 	UPDATE users SET hash_password = $1

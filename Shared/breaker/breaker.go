@@ -11,17 +11,17 @@ import (
 type Params struct {
 	Name           string
 	MaxRequest     uint32
-	Interval       uint
-	Timeout        uint
+	Interval       time.Duration
+	Timeout        time.Duration
 	MaxFailRequest uint32
 }
 
 func NewBreaker(logger *zap.Logger, params Params) *gobreaker.CircuitBreaker {
 	setting := gobreaker.Settings{
-		Name:        params.Name,                                  //Breaker name
-		MaxRequests: params.MaxRequest,                            //Maximum number of requests allowed in half-open mode
-		Interval:    time.Duration(params.Interval) * time.Second, //The period for resetting the statistics for counting failed requests in private mode. Time in seconds.
-		Timeout:     time.Duration(params.Timeout) * time.Second,  //The time the breaker remains in the open state before transitioning to Half-open.
+		Name:        params.Name,       //Breaker name
+		MaxRequests: params.MaxRequest, //Maximum number of requests allowed in half-open mode
+		Interval:    params.Interval,   //The period for resetting the statistics for counting failed requests in private mode. Time in seconds.
+		Timeout:     params.Timeout,    //The time the breaker remains in the open state before transitioning to Half-open.
 		ReadyToTrip: func(counts gobreaker.Counts) bool { //A function that determines the condition for transitioning from Close to Open
 			return counts.ConsecutiveFailures > params.MaxFailRequest
 		},

@@ -195,39 +195,45 @@ func (m *GetOrderResp) validate(all bool) error {
 
 	var errors []error
 
-	if utf8.RuneCountInString(m.GetOrderStatus()) < 1 {
-		err := GetOrderRespValidationError{
-			field:  "OrderStatus",
-			reason: "value length must be at least 1 runes",
+	// no validation rules for OrderStatus
+
+	// no validation rules for OrderId
+
+	if all {
+		switch v := interface{}(m.GetPrice()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, GetOrderRespValidationError{
+					field:  "Price",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, GetOrderRespValidationError{
+					field:  "Price",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
 		}
-		if !all {
-			return err
+	} else if v, ok := interface{}(m.GetPrice()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return GetOrderRespValidationError{
+				field:  "Price",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
 		}
-		errors = append(errors, err)
 	}
 
-	if err := m._validateUuid(m.GetOrderId()); err != nil {
-		err = GetOrderRespValidationError{
-			field:  "OrderId",
-			reason: "value must be a valid UUID",
-			cause:  err,
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for Quantity
+
+	// no validation rules for MarketName
 
 	if len(errors) > 0 {
 		return GetOrderRespMultiError(errors)
-	}
-
-	return nil
-}
-
-func (m *GetOrderResp) _validateUuid(uuid string) error {
-	if matched := _order_service_uuidPattern.MatchString(uuid); !matched {
-		return errors.New("invalid uuid format")
 	}
 
 	return nil
@@ -351,26 +357,33 @@ func (m *CreateOrderReq) validate(all bool) error {
 
 	// no validation rules for OrderType
 
-	if utf8.RuneCountInString(m.GetPrice()) < 1 {
-		err := CreateOrderReqValidationError{
-			field:  "Price",
-			reason: "value length must be at least 1 runes",
+	if all {
+		switch v := interface{}(m.GetPrice()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, CreateOrderReqValidationError{
+					field:  "Price",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, CreateOrderReqValidationError{
+					field:  "Price",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
 		}
-		if !all {
-			return err
+	} else if v, ok := interface{}(m.GetPrice()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return CreateOrderReqValidationError{
+				field:  "Price",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
 		}
-		errors = append(errors, err)
-	}
-
-	if !_CreateOrderReq_Price_Pattern.MatchString(m.GetPrice()) {
-		err := CreateOrderReqValidationError{
-			field:  "Price",
-			reason: "value does not match regex pattern \"^\\\\d+(?:\\\\.\\\\d+)?$|^\\\\.\\\\d+$\"",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
 	}
 
 	if m.GetQuantity() < 1 {
@@ -385,6 +398,17 @@ func (m *CreateOrderReq) validate(all bool) error {
 	}
 
 	// no validation rules for UserRole
+
+	if utf8.RuneCountInString(m.GetIndempotencyKey()) < 1 {
+		err := CreateOrderReqValidationError{
+			field:  "IndempotencyKey",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return CreateOrderReqMultiError(errors)
@@ -472,8 +496,6 @@ var _ interface {
 	ErrorName() string
 } = CreateOrderReqValidationError{}
 
-var _CreateOrderReq_Price_Pattern = regexp.MustCompile("^\\d+(?:\\.\\d+)?$|^\\.\\d+$")
-
 // Validate checks the field values on CreateOrderResp with the rules defined
 // in the proto definition for this message. If any rules are violated, the
 // first error encountered is returned, or nil if there are no violations.
@@ -496,39 +518,12 @@ func (m *CreateOrderResp) validate(all bool) error {
 
 	var errors []error
 
-	if err := m._validateUuid(m.GetOrderId()); err != nil {
-		err = CreateOrderRespValidationError{
-			field:  "OrderId",
-			reason: "value must be a valid UUID",
-			cause:  err,
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for OrderId
 
-	if utf8.RuneCountInString(m.GetOrderStatus()) < 1 {
-		err := CreateOrderRespValidationError{
-			field:  "OrderStatus",
-			reason: "value length must be at least 1 runes",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for OrderStatus
 
 	if len(errors) > 0 {
 		return CreateOrderRespMultiError(errors)
-	}
-
-	return nil
-}
-
-func (m *CreateOrderResp) _validateUuid(uuid string) error {
-	if matched := _order_service_uuidPattern.MatchString(uuid); !matched {
-		return errors.New("invalid uuid format")
 	}
 
 	return nil
@@ -627,10 +622,11 @@ func (m *StreamOrderUpdateReq) validate(all bool) error {
 
 	var errors []error
 
-	if utf8.RuneCountInString(m.GetOrderId()) < 1 {
-		err := StreamOrderUpdateReqValidationError{
+	if err := m._validateUuid(m.GetOrderId()); err != nil {
+		err = StreamOrderUpdateReqValidationError{
 			field:  "OrderId",
-			reason: "value length must be at least 1 runes",
+			reason: "value must be a valid UUID",
+			cause:  err,
 		}
 		if !all {
 			return err
@@ -760,16 +756,7 @@ func (m *StreamOrderUpdateResp) validate(all bool) error {
 
 	var errors []error
 
-	if utf8.RuneCountInString(m.GetOrderStatus()) < 1 {
-		err := StreamOrderUpdateRespValidationError{
-			field:  "OrderStatus",
-			reason: "value length must be at least 1 runes",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for OrderStatus
 
 	if all {
 		switch v := interface{}(m.GetUpdateStatusTime()).(type) {

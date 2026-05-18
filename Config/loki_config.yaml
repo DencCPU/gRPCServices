@@ -1,0 +1,49 @@
+auth_enabled: false                      # отключаем авторизацию (для простоты)
+
+server:
+  http_listen_port: 3100                 # порт для API и Grafana
+
+
+common:
+  path_prefix: /loki
+  replication_factor: 1
+
+ingester:
+  lifecycler:
+    ring:
+      kvstore:
+        store: inmemory                  # хранение состояния в памяти
+      replication_factor: 1
+  chunk_idle_period: 5m                  # время жизни чанка в памяти перед записью
+  chunk_target_size: 1048576             # целевой размер чанка (1Mb)
+
+schema_config:
+  configs:
+    - from: 2024-01-01
+      store: tsdb                        # тип индекса (tsdb для новых версий)
+      object_store: filesystem           # хранилище данных — локальная файловая система
+      schema: v13                        # версия схемы (актуальная)
+      index:
+        prefix: index_                   # префикс для файлов индекса
+        period: 24h                      # период ротации индекса
+
+storage_config:
+  filesystem:
+    directory: /loki/chunks              # директория для хранения чанков
+  
+  # НОВЫЙ БЛОК: Указывает где tsdb_shipper должен собирать и кэшировать индексы
+  tsdb_shipper:
+    active_index_directory: /loki/tsdb-index
+    cache_location: /loki/tsdb-cache
+
+limits_config:
+  retention_period: 168h                 # срок хранения логов (7 дней)
+  ingestion_rate_mb: 10                  # ограничение на приём логов (Mb/s)
+  ingestion_burst_size_mb: 20            # максимальный "всплеск" потребления
+  allow_structured_metadata: true        # ОБЯЗАТЕЛЬНО для работы с OpenTelemetry
+
+compactor:
+  working_directory: /loki/compactor
+  retention_enabled: true                # нужно для работы retention_period
+  # ИСПРАВЛЕНИЕ ОШИБКИ: Указываем файловую систему для хранения запросов удаления
+  delete_request_store: filesystem     

@@ -1,6 +1,8 @@
 package orderdto
 
-import "time"
+import (
+	"time"
+)
 
 type GetInput struct {
 	UserId  string `json:"user_id"`
@@ -8,8 +10,11 @@ type GetInput struct {
 }
 
 type GetOutput struct {
-	OrderId     string
-	OrderStatus string
+	Status     string
+	OrderId    string
+	Price      string
+	Quantity   int64
+	MarketName string
 }
 
 type StreamOutput struct {

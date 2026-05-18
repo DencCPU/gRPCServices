@@ -3,7 +3,6 @@ package apprunner
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	user "github.com/DencCPU/gRPCServices/Protobuf/gen/user_service"
 	"github.com/DencCPU/gRPCServices/Shared/config"
@@ -16,7 +15,7 @@ import (
 	userhandlers "github.com/DencCPU/gRPCServices/UserService/internal/controllers/grpc_handlers"
 	"github.com/DencCPU/gRPCServices/UserService/internal/usecase"
 	"github.com/DencCPU/gRPCServices/UserService/pkg/userserver"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.opentelemetry.io/contrib/bridges/otelzap"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
@@ -24,6 +23,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 // Logger
@@ -64,13 +64,10 @@ func ConfigModul() fx.Option {
 			)
 			return loader
 		},
-		func(loader *config.ConfigLoader, logger *zap.Logger) (*userconfig.Config, error) {
+		func(loader *config.ConfigLoader) (*userconfig.Config, error) {
 			config, err := config.NewConfig[userconfig.Config](loader)
 			if err != nil {
-				logger.Error("error getting config",
-					zap.Error(err),
-				)
-				return nil, err
+				return nil, fmt.Errorf("error getting config:%w", err)
 			}
 			return config, nil
 		},
@@ -110,11 +107,12 @@ func TracingModule() fx.Option {
 	return fx.Options(
 		fx.Provide(
 			func(logger *zap.Logger, config *userconfig.Config) (*sdktrace.TracerProvider, trace.Tracer, error) {
+				fmt.Println("TRACING:", config.OtelCollector.Host+":"+config.OtelCollector.Port, config.OtelCollector.MetricInterval)
 				otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
 					propagation.TraceContext{},
 					propagation.Baggage{},
 				))
-				trace, err := opentelemetry.NewGrpcTracer(context.Background(), "userService", config.Jaeger.Host, config.Jaeger.Port)
+				trace, err := opentelemetry.NewTracerProviderGrpc(context.Background(), "userService", config.OtelCollector.Host, config.OtelCollector.Port, config.OtelCollector.TracePercentage)
 				if err != nil {
 					logger.Error("tracer initialization error:",
 						zap.Error(err))
@@ -140,36 +138,72 @@ func TracingModule() fx.Option {
 func MetricModul() fx.Option {
 	return fx.Options(
 		fx.Provide(
-			func(logger *zap.Logger) (*sdkmetric.MeterProvider, error) {
-				provider, err := opentelemetry.NewMetricPrometeus(context.Background(), "UserService")
+			func(logger *zap.Logger, cfg *userconfig.Config) (*sdkmetric.MeterProvider, error) {
+
+				provider, err := opentelemetry.NewMetricProviderGrpc(
+					context.Background(),
+					"User/service",
+					cfg.OtelCollector.Host,
+					cfg.OtelCollector.Port,
+					cfg.OtelCollector.MetricInterval,
+				)
 				if err != nil {
 					logger.Error("error initialization metric:",
 						zap.Error(err))
 					return nil, err
 				}
-
 				return provider, err
 			},
 		),
 		fx.Invoke(
-			func(lc fx.Lifecycle, logger *zap.Logger, provider *sdkmetric.MeterProvider) {
+			func(lc fx.Lifecycle, logger *zap.Logger, metric *sdkmetric.MeterProvider) {
 				lc.Append(fx.Hook{
-					OnStart: func(ctx context.Context) error {
-						go func() {
-							http.Handle("/metrics", promhttp.Handler())
-							logger.Info("The server is running on port 9466...")
-							err := http.ListenAndServe(":9466", nil)
-							if err != nil {
-								logger.Error("server error for metric:",
-									zap.Error(err),
-								)
-							}
-						}()
+					OnStop: func(ctx context.Context) error {
+						metric.Shutdown(ctx)
+						logger.Info("Metric stoped")
 						return nil
 					},
-					OnStop: func(ctx context.Context) error {
+				})
+			},
+		),
+	)
+}
 
-						return provider.Shutdown(ctx)
+// OtelLogger
+func OtelLogger() fx.Option {
+	return fx.Options(fx.Provide(
+		func(cfg *userconfig.Config) (*zap.Logger, error) {
+			logger, err := logger.NewLogger()
+			if err != nil {
+				return nil, fmt.Errorf("zap logger initialition error:%w", err)
+			}
+
+			loggerProvider, err := opentelemetry.NewLoggerProviderGrpc(
+				context.Background(),
+				"User/service",
+				cfg.OtelCollector.Host,
+				cfg.OtelCollector.Port)
+
+			if err != nil {
+				logger.Error("logger provider initialization error",
+					zap.Error(err),
+				)
+				return nil, err
+
+			}
+			otlpCore := otelzap.NewCore("User/service", otelzap.WithLoggerProvider(loggerProvider))
+			teeCore := zapcore.NewTee(logger.Core(), otlpCore)
+			otlpLogger := zap.New(teeCore, zap.WithCaller(true))
+
+			return otlpLogger, nil
+		},
+	),
+		fx.Invoke(
+			func(lc fx.Lifecycle, logger *zap.Logger) {
+				lc.Append(fx.Hook{
+					OnStop: func(ctx context.Context) error {
+						_ = logger.Sync()
+						return nil
 					},
 				})
 			},
@@ -226,13 +260,14 @@ func GrpcModule() fx.Option {
 			},
 		),
 		fx.Invoke(
-			func(lc fx.Lifecycle, server *userserver.Server, handlers *userhandlers.Handler, logger *zap.Logger) {
+			func(lc fx.Lifecycle, server *userserver.Server, handlers *userhandlers.Handler, logger *zap.Logger, cfg *userconfig.Config) {
 				user.RegisterUserServiceServer(server, handlers)
 
 				lc.Append(fx.Hook{
 					OnStart: func(ctx context.Context) error {
 						go func() {
-							logger.Info("Server start on port 8083...")
+							info := fmt.Sprintf("Server start on port:%s", cfg.Server.Port)
+							logger.Info(info)
 							err := server.Serve(server.Listener)
 							if err != nil {
 								logger.Error("error working server:",
@@ -268,7 +303,8 @@ func GrpcModule() fx.Option {
 
 func FxAppRunner() (*fx.App, error) {
 	app := fx.New(
-		LoggerModul(),
+		// LoggerModul(),
+		OtelLogger(),
 		ConfigModul(),
 		PostgresModul(),
 		TracingModule(),

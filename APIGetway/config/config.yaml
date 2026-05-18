@@ -5,10 +5,12 @@ server:
 breakersetting:
   name: "APIGetway"
   max_request: 5
-  interval: 60
-  timeout: 10
+  interval: 60s
+  timeout: 10s
   max_fail_request: 10
 
-jaeger:
-  host: 
-  port: 
+collector:
+  host:
+  port:
+  trace_percentage: 100
+  metric_interval: 1s

@@ -1,4 +1,4 @@
-auth_enabled: false                      # отключаем авторизацию (для простоты)
+auth_enabled: false                      # отключение авторизации 
 
 server:
   http_listen_port: 3100                 # порт для API и Grafana
@@ -21,8 +21,8 @@ schema_config:
   configs:
     - from: 2024-01-01
       store: tsdb                        # тип индекса (tsdb для новых версий)
-      object_store: filesystem           # хранилище данных — локальная файловая система
-      schema: v13                        # версия схемы (актуальная)
+      object_store: filesystem           # храниние данных локально
+      schema: v13                        # версия схемы 
       index:
         prefix: index_                   # префикс для файлов индекса
         period: 24h                      # период ротации индекса
@@ -31,7 +31,7 @@ storage_config:
   filesystem:
     directory: /loki/chunks              # директория для хранения чанков
   
-  # НОВЫЙ БЛОК: Указывает где tsdb_shipper должен собирать и кэшировать индексы
+
   tsdb_shipper:
     active_index_directory: /loki/tsdb-index
     cache_location: /loki/tsdb-cache
@@ -40,10 +40,10 @@ limits_config:
   retention_period: 168h                 # срок хранения логов (7 дней)
   ingestion_rate_mb: 10                  # ограничение на приём логов (Mb/s)
   ingestion_burst_size_mb: 20            # максимальный "всплеск" потребления
-  allow_structured_metadata: true        # ОБЯЗАТЕЛЬНО для работы с OpenTelemetry
+  allow_structured_metadata: true        
 
 compactor:
   working_directory: /loki/compactor
-  retention_enabled: true                # нужно для работы retention_period
-  # ИСПРАВЛЕНИЕ ОШИБКИ: Указываем файловую систему для хранения запросов удаления
+  retention_enabled: true               
+ 
   delete_request_store: filesystem     

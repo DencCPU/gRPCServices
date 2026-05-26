@@ -19,12 +19,13 @@ func (h *Handlers) CreateOrder(ctx context.Context, req *order.CreateOrderReq) (
 	uints := decimal.NewFromInt(req.Price.Units)
 	nanos := decimal.NewFromInt32(req.Price.Nanos).Shift(-9)
 	newOrder := orderdomain.Order{
-		UserId:    req.UserId,
-		MarketId:  req.MarketId,
-		OrderType: orderdomain.OrderType(req.OrderType),
-		Price:     uints.Add(nanos),
-		Quantity:  req.Quantity,
-		UserRole:  orderdomain.UserRole(req.UserRole),
+		UserId:         req.UserId,
+		MarketId:       req.MarketId,
+		OrderType:      orderdomain.OrderType(req.OrderType),
+		Price:          uints.Add(nanos),
+		Quantity:       req.Quantity,
+		UserRole:       orderdomain.UserRole(req.UserRole),
+		IdempotencyKey: req.IndempotencyKey,
 	}
 
 	if newOrder.OrderType == orderdomain.ORDER_TYPE_UNSPECIFIED {

@@ -5,8 +5,8 @@ import (
 )
 
 func (p *PostgresDB) IdempotencyCheck(idepotencyKey string) bool {
-	p.idempotencyCacheMu.RLock()
-	defer p.idempotencyCacheMu.RUnlock()
+	p.idempotencyCacheMu.Lock()
+	defer p.idempotencyCacheMu.Unlock()
 	if _, exist := p.idempotecyCache[idepotencyKey]; !exist {
 		p.idempotecyCache[idepotencyKey] = time.Now().Add(p.idempotencyCacheTTL)
 		return true

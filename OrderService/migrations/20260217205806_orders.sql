@@ -12,6 +12,9 @@ CREATE TABLE IF NOT EXISTS orders(
     order_id INT REFERENCES orders_id(id),
     created_at TIMESTAMPTZ NOT NULL
 );
+CREATE INDEX idx_orders_user_id ON orders(user_id);
+CREATE INDEX idx_orders_order_id ON orders(order_id);
+CREATE INDEX idx_orders_market_id ON orders(market_id);
 -- +goose StatementEnd
 
 -- +goose Down

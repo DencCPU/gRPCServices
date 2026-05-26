@@ -21,8 +21,9 @@ import (
 func (c *Client) CreateNewOrder(ctx context.Context, order orderdomain.OrderInfo) (orderdto.Output, error) {
 	d, err := decimal.NewFromString(order.Price)
 	if err != nil {
-		return orderdto.Output{}, nil
+		return orderdto.Output{}, err
 	}
+
 	data := fmt.Sprintf("%s%s%v%s%d",
 		order.UserId,
 		order.MarketId,

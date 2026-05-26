@@ -16,12 +16,15 @@ type Notify interface {
 }
 
 type PostgresDB struct {
-	db               *pgxpool.Pool
-	notify           Notify
-	controlOrderChan chan orderdomain.OrderInfo
-	idempotecyCache  map[string]time.Time
-	cacheTTL         time.Duration
-	cacheMu          sync.RWMutex
+	db                  *pgxpool.Pool
+	notify              Notify
+	controlOrderChan    chan orderdomain.OrderInfo
+	idempotecyCache     map[string]time.Time
+	idempotencyCacheTTL time.Duration
+	idempotencyCacheMu  sync.RWMutex
+	marketCache         map[string]orderdomain.Market
+	marketMu            sync.RWMutex
+	marketCacheTTL      time.Duration
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -53,18 +56,21 @@ func NewDB(ctx context.Context, cfg orderconfig.Postgres, notify Notify) (*Postg
 
 	dbCtx, dbCancel := context.WithCancel(ctx)
 	postgres := PostgresDB{}
-	postgres.cacheTTL = cfg.IdempotencyCacheTTL
-	fmt.Println("TTL:", postgres.cacheTTL)
+	postgres.idempotencyCacheTTL = cfg.IdempotencyCacheTTL
+	fmt.Println("TTL:", postgres.idempotencyCacheTTL)
 	return &PostgresDB{
-		db:               dataBase,
-		notify:           notify,
-		controlOrderChan: make(chan orderdomain.OrderInfo, cfg.ControlChanSize),
-		idempotecyCache:  map[string]time.Time{},
-		cacheTTL:         cfg.IdempotencyCacheTTL,
-		cacheMu:          sync.RWMutex{},
-		ctx:              dbCtx,
-		cancel:           dbCancel,
-		wg:               sync.WaitGroup{}}, nil
+		db:                  dataBase,
+		notify:              notify,
+		controlOrderChan:    make(chan orderdomain.OrderInfo, cfg.ControlChanSize),
+		idempotecyCache:     map[string]time.Time{},
+		idempotencyCacheTTL: cfg.IdempotencyCacheTTL,
+		idempotencyCacheMu:  sync.RWMutex{},
+		marketCache:         make(map[string]orderdomain.Market),
+		marketMu:            sync.RWMutex{},
+		marketCacheTTL:      cfg.MarketCacheTTL,
+		ctx:                 dbCtx,
+		cancel:              dbCancel,
+		wg:                  sync.WaitGroup{}}, nil
 }
 
 func (p *PostgresDB) GetPgxPool() *pgxpool.Pool {

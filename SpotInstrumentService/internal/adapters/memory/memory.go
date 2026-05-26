@@ -9,8 +9,7 @@ import (
 
 // In-memory хранилище для хранения рынков
 type Storage struct {
-	date   map[string]*domainmarket.Market //Хранилище
-	keys   []string
+	date   map[int]*domainmarket.Market //Хранилище
 	mu     sync.RWMutex
 	logger *zap.Logger
 }
@@ -18,7 +17,7 @@ type Storage struct {
 // Создание нового хранинлища
 func NewStorage(logger *zap.Logger) (*Storage, error) {
 	s := Storage{
-		date:   make(map[string]*domainmarket.Market),
+		date:   make(map[int]*domainmarket.Market),
 		logger: logger,
 	}
 

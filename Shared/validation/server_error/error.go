@@ -14,6 +14,7 @@ func ServerError(err error) bool {
 	if !ok {
 		return false //Неизыестна ошибка
 	}
+
 	switch status.Code() {
 	case codes.Unavailable, // сервис недоступен
 		codes.DeadlineExceeded,  // таймаут
@@ -21,6 +22,7 @@ func ServerError(err error) bool {
 		codes.Unknown,           // неизвестная ошибка
 		codes.ResourceExhausted: // перегрузка
 		return false
+
 	default:
 		return true
 	}

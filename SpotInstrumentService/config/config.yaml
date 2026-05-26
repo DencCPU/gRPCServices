@@ -24,3 +24,15 @@ collector:
   port:
   trace_percentage: 100
   metric_interval: 1s
+
+kafka:
+  host:
+  port:
+  topic: "markets"
+  max_attempts: 10
+  write_backoff_min: 100ms
+  write_backoff_max: 2s
+  batch_size: 1
+  batch_bytes: 1024
+  get_markets_interval: 10s
+  relay_interval: 3s

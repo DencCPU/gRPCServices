@@ -24,7 +24,7 @@ const (
 )
 
 // Запрос для ViewMarket
-type ViewReq struct {
+type ViewMarketReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserRoles     common.UserRole        `protobuf:"varint,1,opt,name=user_roles,json=userRoles,proto3,enum=common.UserRole" json:"user_roles,omitempty"`
 	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -34,20 +34,20 @@ type ViewReq struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ViewReq) Reset() {
-	*x = ViewReq{}
+func (x *ViewMarketReq) Reset() {
+	*x = ViewMarketReq{}
 	mi := &file_spot_service_spot_service_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ViewReq) String() string {
+func (x *ViewMarketReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ViewReq) ProtoMessage() {}
+func (*ViewMarketReq) ProtoMessage() {}
 
-func (x *ViewReq) ProtoReflect() protoreflect.Message {
+func (x *ViewMarketReq) ProtoReflect() protoreflect.Message {
 	mi := &file_spot_service_spot_service_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -59,33 +59,33 @@ func (x *ViewReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ViewReq.ProtoReflect.Descriptor instead.
-func (*ViewReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use ViewMarketReq.ProtoReflect.Descriptor instead.
+func (*ViewMarketReq) Descriptor() ([]byte, []int) {
 	return file_spot_service_spot_service_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ViewReq) GetUserRoles() common.UserRole {
+func (x *ViewMarketReq) GetUserRoles() common.UserRole {
 	if x != nil {
 		return x.UserRoles
 	}
 	return common.UserRole(0)
 }
 
-func (x *ViewReq) GetUserId() string {
+func (x *ViewMarketReq) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
 	return ""
 }
 
-func (x *ViewReq) GetPageSize() int32 {
+func (x *ViewMarketReq) GetPageSize() int32 {
 	if x != nil {
 		return x.PageSize
 	}
 	return 0
 }
 
-func (x *ViewReq) GetPageToken() string {
+func (x *ViewMarketReq) GetPageToken() string {
 	if x != nil {
 		return x.PageToken
 	}
@@ -93,28 +93,28 @@ func (x *ViewReq) GetPageToken() string {
 }
 
 // Ответ для ViewMarket
-type ViewResp struct {
+type ViewMarketResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	EnableMarkets []*Markets             `protobuf:"bytes,1,rep,name=enable_markets,json=enableMarkets,proto3" json:"enable_markets,omitempty"`
-	PageToken     string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	EnableMarkets []*Market              `protobuf:"bytes,1,rep,name=enable_markets,json=enableMarkets,proto3" json:"enable_markets,omitempty"`
+	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ViewResp) Reset() {
-	*x = ViewResp{}
+func (x *ViewMarketResp) Reset() {
+	*x = ViewMarketResp{}
 	mi := &file_spot_service_spot_service_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ViewResp) String() string {
+func (x *ViewMarketResp) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ViewResp) ProtoMessage() {}
+func (*ViewMarketResp) ProtoMessage() {}
 
-func (x *ViewResp) ProtoReflect() protoreflect.Message {
+func (x *ViewMarketResp) ProtoReflect() protoreflect.Message {
 	mi := &file_spot_service_spot_service_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -126,26 +126,26 @@ func (x *ViewResp) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ViewResp.ProtoReflect.Descriptor instead.
-func (*ViewResp) Descriptor() ([]byte, []int) {
+// Deprecated: Use ViewMarketResp.ProtoReflect.Descriptor instead.
+func (*ViewMarketResp) Descriptor() ([]byte, []int) {
 	return file_spot_service_spot_service_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ViewResp) GetEnableMarkets() []*Markets {
+func (x *ViewMarketResp) GetEnableMarkets() []*Market {
 	if x != nil {
 		return x.EnableMarkets
 	}
 	return nil
 }
 
-func (x *ViewResp) GetPageToken() string {
+func (x *ViewMarketResp) GetNextPageToken() string {
 	if x != nil {
-		return x.PageToken
+		return x.NextPageToken
 	}
 	return ""
 }
 
-type Markets struct {
+type Market struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	MarketId      string                 `protobuf:"bytes,1,opt,name=market_id,json=marketId,proto3" json:"market_id,omitempty"`
 	MarketName    string                 `protobuf:"bytes,2,opt,name=market_name,json=marketName,proto3" json:"market_name,omitempty"`
@@ -153,20 +153,20 @@ type Markets struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Markets) Reset() {
-	*x = Markets{}
+func (x *Market) Reset() {
+	*x = Market{}
 	mi := &file_spot_service_spot_service_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Markets) String() string {
+func (x *Market) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Markets) ProtoMessage() {}
+func (*Market) ProtoMessage() {}
 
-func (x *Markets) ProtoReflect() protoreflect.Message {
+func (x *Market) ProtoReflect() protoreflect.Message {
 	mi := &file_spot_service_spot_service_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -178,19 +178,19 @@ func (x *Markets) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Markets.ProtoReflect.Descriptor instead.
-func (*Markets) Descriptor() ([]byte, []int) {
+// Deprecated: Use Market.ProtoReflect.Descriptor instead.
+func (*Market) Descriptor() ([]byte, []int) {
 	return file_spot_service_spot_service_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *Markets) GetMarketId() string {
+func (x *Market) GetMarketId() string {
 	if x != nil {
 		return x.MarketId
 	}
 	return ""
 }
 
-func (x *Markets) GetMarketName() string {
+func (x *Market) GetMarketName() string {
 	if x != nil {
 		return x.MarketName
 	}
@@ -201,25 +201,24 @@ var File_spot_service_spot_service_proto protoreflect.FileDescriptor
 
 const file_spot_service_spot_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1fspot_service/spot_service.proto\x12\x0fspot_service.v2\x1a\x13common/common.proto\x1a\x17validate/validate.proto\"\xa4\x01\n" +
-	"\aViewReq\x12/\n" +
+	"\x1fspot_service/spot_service.proto\x12\x0fspot_service.v2\x1a\x13common/common.proto\x1a\x17validate/validate.proto\"\xaa\x01\n" +
+	"\rViewMarketReq\x12/\n" +
 	"\n" +
 	"user_roles\x18\x01 \x01(\x0e2\x10.common.UserRoleR\tuserRoles\x12!\n" +
 	"\auser_id\x18\x02 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\x06userId\x12&\n" +
 	"\tpage_size\x18\x03 \x01(\x05B\t\xfaB\x06\x1a\x04\x182(\x00R\bpageSize\x12\x1d\n" +
 	"\n" +
-	"page_token\x18\x04 \x01(\tR\tpageToken\"j\n" +
-	"\bViewResp\x12?\n" +
-	"\x0eenable_markets\x18\x01 \x03(\v2\x18.spot_service.v2.MarketsR\renableMarkets\x12\x1d\n" +
-	"\n" +
-	"page_token\x18\x02 \x01(\tR\tpageToken\"G\n" +
-	"\aMarkets\x12\x1b\n" +
+	"page_token\x18\x04 \x01(\tR\tpageToken\"x\n" +
+	"\x0eViewMarketResp\x12>\n" +
+	"\x0eenable_markets\x18\x01 \x03(\v2\x17.spot_service.v2.MarketR\renableMarkets\x12&\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"F\n" +
+	"\x06Market\x12\x1b\n" +
 	"\tmarket_id\x18\x01 \x01(\tR\bmarketId\x12\x1f\n" +
 	"\vmarket_name\x18\x02 \x01(\tR\n" +
-	"marketName2Z\n" +
-	"\x15SpotInstrumentService\x12A\n" +
+	"marketName2f\n" +
+	"\x15SpotInstrumentService\x12M\n" +
 	"\n" +
-	"ViewMarket\x12\x18.spot_service.v2.ViewReq\x1a\x19.spot_service.v2.ViewRespB<Z:github.com/DenсCPU/gRPCServices/Protobuf/gen/spot_serviceb\x06proto3"
+	"ViewMarket\x12\x1e.spot_service.v2.ViewMarketReq\x1a\x1f.spot_service.v2.ViewMarketRespB<Z:github.com/DenсCPU/gRPCServices/Protobuf/gen/spot_serviceb\x06proto3"
 
 var (
 	file_spot_service_spot_service_proto_rawDescOnce sync.Once
@@ -235,16 +234,16 @@ func file_spot_service_spot_service_proto_rawDescGZIP() []byte {
 
 var file_spot_service_spot_service_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_spot_service_spot_service_proto_goTypes = []any{
-	(*ViewReq)(nil),      // 0: spot_service.v2.ViewReq
-	(*ViewResp)(nil),     // 1: spot_service.v2.ViewResp
-	(*Markets)(nil),      // 2: spot_service.v2.Markets
-	(common.UserRole)(0), // 3: common.UserRole
+	(*ViewMarketReq)(nil),  // 0: spot_service.v2.ViewMarketReq
+	(*ViewMarketResp)(nil), // 1: spot_service.v2.ViewMarketResp
+	(*Market)(nil),         // 2: spot_service.v2.Market
+	(common.UserRole)(0),   // 3: common.UserRole
 }
 var file_spot_service_spot_service_proto_depIdxs = []int32{
-	3, // 0: spot_service.v2.ViewReq.user_roles:type_name -> common.UserRole
-	2, // 1: spot_service.v2.ViewResp.enable_markets:type_name -> spot_service.v2.Markets
-	0, // 2: spot_service.v2.SpotInstrumentService.ViewMarket:input_type -> spot_service.v2.ViewReq
-	1, // 3: spot_service.v2.SpotInstrumentService.ViewMarket:output_type -> spot_service.v2.ViewResp
+	3, // 0: spot_service.v2.ViewMarketReq.user_roles:type_name -> common.UserRole
+	2, // 1: spot_service.v2.ViewMarketResp.enable_markets:type_name -> spot_service.v2.Market
+	0, // 2: spot_service.v2.SpotInstrumentService.ViewMarket:input_type -> spot_service.v2.ViewMarketReq
+	1, // 3: spot_service.v2.SpotInstrumentService.ViewMarket:output_type -> spot_service.v2.ViewMarketResp
 	3, // [3:4] is the sub-list for method output_type
 	2, // [2:3] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name

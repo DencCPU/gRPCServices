@@ -24,7 +24,8 @@ func (s *SpotService) ViewMarket(ctx context.Context, input domainusers.Input) (
 		attribute.Int("PageSize", input.PageSize),
 		attribute.String("PageToken", input.PageToken),
 	)
-	enableMarkets, pageToken := s.GetEnableMarkets(input)
+
+	enableMarkets, pageToken := s.storage.GetEnableMarkets(input)
 
 	if len(enableMarkets) == 0 {
 		s.logger.Error("no markets available")
@@ -37,6 +38,7 @@ func (s *SpotService) ViewMarket(ctx context.Context, input domainusers.Input) (
 	s.logger.Info("List of available markets received",
 		zap.String("spanID:", span.SpanContext().SpanID().String()),
 	)
+
 	span.SetStatus(codes.Ok, "view markets successfuly")
 	return Mapper(enableMarkets), pageToken, nil
 }

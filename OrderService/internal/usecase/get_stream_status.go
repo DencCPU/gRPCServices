@@ -14,6 +14,7 @@ func (o *OrderService) StreamGetState(ctx context.Context, key orderdomain.Key) 
 	if err != nil {
 		return nil, err
 	}
+
 	//Sign new client
 	stateCh := o.notify.AddNewSub(key)
 	o.logger.Info("New client signed",

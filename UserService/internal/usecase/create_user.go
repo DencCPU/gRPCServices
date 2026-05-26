@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 
 	tokensdto "github.com/DencCPU/gRPCServices/UserService/internal/adapters/dto/tokens"
 	domainuser "github.com/DencCPU/gRPCServices/UserService/internal/domain/user"
@@ -18,9 +19,17 @@ func (s *Service) CreateUser(ctx context.Context, user domainuser.User) (tokensd
 	span.SetAttributes(
 		attribute.String("name", user.Name),
 		attribute.String("email", user.Email),
-		attribute.String("password", user.Password),
-		attribute.String("role:", user.Role),
 	)
+
+	span.AddEvent("checking if an email exists")
+	ctx, span = s.tracer.Start(ctx, "Checking if an email exists")
+	defer span.End()
+
+	exist := s.storage.CheckUser(ctx, user.Email)
+	if exist {
+		span.SetStatus(codes.Error, "this user is already registered")
+		return tokensdto.PairToken{}, errors.New("this user is already registered")
+	}
 
 	user_id, refreshToken, err := s.storage.AddUser(ctx, user)
 	if err != nil {

@@ -28,7 +28,7 @@ const (
 //
 // Предоставления данных о рынках
 type SpotInstrumentServiceClient interface {
-	ViewMarket(ctx context.Context, in *ViewReq, opts ...grpc.CallOption) (*ViewResp, error)
+	ViewMarket(ctx context.Context, in *ViewMarketReq, opts ...grpc.CallOption) (*ViewMarketResp, error)
 }
 
 type spotInstrumentServiceClient struct {
@@ -39,9 +39,9 @@ func NewSpotInstrumentServiceClient(cc grpc.ClientConnInterface) SpotInstrumentS
 	return &spotInstrumentServiceClient{cc}
 }
 
-func (c *spotInstrumentServiceClient) ViewMarket(ctx context.Context, in *ViewReq, opts ...grpc.CallOption) (*ViewResp, error) {
+func (c *spotInstrumentServiceClient) ViewMarket(ctx context.Context, in *ViewMarketReq, opts ...grpc.CallOption) (*ViewMarketResp, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ViewResp)
+	out := new(ViewMarketResp)
 	err := c.cc.Invoke(ctx, SpotInstrumentService_ViewMarket_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func (c *spotInstrumentServiceClient) ViewMarket(ctx context.Context, in *ViewRe
 //
 // Предоставления данных о рынках
 type SpotInstrumentServiceServer interface {
-	ViewMarket(context.Context, *ViewReq) (*ViewResp, error)
+	ViewMarket(context.Context, *ViewMarketReq) (*ViewMarketResp, error)
 	mustEmbedUnimplementedSpotInstrumentServiceServer()
 }
 
@@ -66,7 +66,7 @@ type SpotInstrumentServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedSpotInstrumentServiceServer struct{}
 
-func (UnimplementedSpotInstrumentServiceServer) ViewMarket(context.Context, *ViewReq) (*ViewResp, error) {
+func (UnimplementedSpotInstrumentServiceServer) ViewMarket(context.Context, *ViewMarketReq) (*ViewMarketResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ViewMarket not implemented")
 }
 func (UnimplementedSpotInstrumentServiceServer) mustEmbedUnimplementedSpotInstrumentServiceServer() {}
@@ -91,7 +91,7 @@ func RegisterSpotInstrumentServiceServer(s grpc.ServiceRegistrar, srv SpotInstru
 }
 
 func _SpotInstrumentService_ViewMarket_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ViewReq)
+	in := new(ViewMarketReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func _SpotInstrumentService_ViewMarket_Handler(srv interface{}, ctx context.Cont
 		FullMethod: SpotInstrumentService_ViewMarket_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SpotInstrumentServiceServer).ViewMarket(ctx, req.(*ViewReq))
+		return srv.(SpotInstrumentServiceServer).ViewMarket(ctx, req.(*ViewMarketReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }

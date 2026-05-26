@@ -7,15 +7,14 @@
 package user_service
 
 import (
-	reflect "reflect"
-	sync "sync"
-	unsafe "unsafe"
-
 	common "github.com/DencCPU/gRPCServices/Protobuf/gen/common"
 	_ "github.com/envoyproxy/protoc-gen-validate/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+	reflect "reflect"
+	sync "sync"
+	unsafe "unsafe"
 )
 
 const (
@@ -25,30 +24,29 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type CreateUserReq struct {
+type RegistrationUserReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
 	Password      string                 `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
-	UserRole      common.UserRole        `protobuf:"varint,4,opt,name=user_role,json=userRole,proto3,enum=common.UserRole" json:"user_role,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *CreateUserReq) Reset() {
-	*x = CreateUserReq{}
+func (x *RegistrationUserReq) Reset() {
+	*x = RegistrationUserReq{}
 	mi := &file_user_service_user_service_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CreateUserReq) String() string {
+func (x *RegistrationUserReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateUserReq) ProtoMessage() {}
+func (*RegistrationUserReq) ProtoMessage() {}
 
-func (x *CreateUserReq) ProtoReflect() protoreflect.Message {
+func (x *RegistrationUserReq) ProtoReflect() protoreflect.Message {
 	mi := &file_user_service_user_service_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -60,40 +58,33 @@ func (x *CreateUserReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreateUserReq.ProtoReflect.Descriptor instead.
-func (*CreateUserReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use RegistrationUserReq.ProtoReflect.Descriptor instead.
+func (*RegistrationUserReq) Descriptor() ([]byte, []int) {
 	return file_user_service_user_service_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *CreateUserReq) GetName() string {
+func (x *RegistrationUserReq) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *CreateUserReq) GetEmail() string {
+func (x *RegistrationUserReq) GetEmail() string {
 	if x != nil {
 		return x.Email
 	}
 	return ""
 }
 
-func (x *CreateUserReq) GetPassword() string {
+func (x *RegistrationUserReq) GetPassword() string {
 	if x != nil {
 		return x.Password
 	}
 	return ""
 }
 
-func (x *CreateUserReq) GetUserRole() common.UserRole {
-	if x != nil {
-		return x.UserRole
-	}
-	return common.UserRole(0)
-}
-
-type CreateUserResp struct {
+type RegistrationUserResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
 	RefreshToken  string                 `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
@@ -102,20 +93,20 @@ type CreateUserResp struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *CreateUserResp) Reset() {
-	*x = CreateUserResp{}
+func (x *RegistrationUserResp) Reset() {
+	*x = RegistrationUserResp{}
 	mi := &file_user_service_user_service_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CreateUserResp) String() string {
+func (x *RegistrationUserResp) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateUserResp) ProtoMessage() {}
+func (*RegistrationUserResp) ProtoMessage() {}
 
-func (x *CreateUserResp) ProtoReflect() protoreflect.Message {
+func (x *RegistrationUserResp) ProtoReflect() protoreflect.Message {
 	mi := &file_user_service_user_service_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -127,26 +118,26 @@ func (x *CreateUserResp) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreateUserResp.ProtoReflect.Descriptor instead.
-func (*CreateUserResp) Descriptor() ([]byte, []int) {
+// Deprecated: Use RegistrationUserResp.ProtoReflect.Descriptor instead.
+func (*RegistrationUserResp) Descriptor() ([]byte, []int) {
 	return file_user_service_user_service_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *CreateUserResp) GetAccessToken() string {
+func (x *RegistrationUserResp) GetAccessToken() string {
 	if x != nil {
 		return x.AccessToken
 	}
 	return ""
 }
 
-func (x *CreateUserResp) GetRefreshToken() string {
+func (x *RegistrationUserResp) GetRefreshToken() string {
 	if x != nil {
 		return x.RefreshToken
 	}
 	return ""
 }
 
-func (x *CreateUserResp) GetExpireAt() *timestamppb.Timestamp {
+func (x *RegistrationUserResp) GetExpireAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.ExpireAt
 	}
@@ -477,13 +468,12 @@ var File_user_service_user_service_proto protoreflect.FileDescriptor
 
 const file_user_service_user_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1fuser_service/user_service.proto\x12\x0fuser_service.v1\x1a\x13common/common.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17validate/validate.proto\"\x9f\x01\n" +
-	"\rCreateUserReq\x12\x1b\n" +
+	"\x1fuser_service/user_service.proto\x12\x0fuser_service.v1\x1a\x13common/common.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17validate/validate.proto\"v\n" +
+	"\x13RegistrationUserReq\x12\x1b\n" +
 	"\x04name\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x02R\x04name\x12\x1d\n" +
 	"\x05email\x18\x02 \x01(\tB\a\xfaB\x04r\x02`\x01R\x05email\x12#\n" +
-	"\bpassword\x18\x03 \x01(\tB\a\xfaB\x04r\x02\x10\bR\bpassword\x12-\n" +
-	"\tuser_role\x18\x04 \x01(\x0e2\x10.common.UserRoleR\buserRole\"\x91\x01\n" +
-	"\x0eCreateUserResp\x12!\n" +
+	"\bpassword\x18\x03 \x01(\tB\a\xfaB\x04r\x02\x10\bR\bpassword\"\x97\x01\n" +
+	"\x14RegistrationUserResp\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\x127\n" +
 	"\texpire_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\bexpireAt\"l\n" +
@@ -505,10 +495,9 @@ const file_user_service_user_service_proto_rawDesc = "" +
 	"\bAuthResp\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\x127\n" +
-	"\texpire_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\bexpireAt2\xcd\x02\n" +
-	"\vUserService\x12M\n" +
-	"\n" +
-	"CreateUser\x12\x1e.user_service.v1.CreateUserReq\x1a\x1f.user_service.v1.CreateUserResp\x12S\n" +
+	"\texpire_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\bexpireAt2\xe2\x02\n" +
+	"\vUserService\x12b\n" +
+	"\x13RegistrationNewUser\x12$.user_service.v1.RegistrationUserReq\x1a%.user_service.v1.RegistrationUserResp\x12S\n" +
 	"\fUpdateTokens\x12 .user_service.v1.UpdateTokensReq\x1a!.user_service.v1.UpdateTokensResp\x12S\n" +
 	"\x10ValidationTokens\x12\x1e.user_service.v1.ValidationReq\x1a\x1f.user_service.v1.ValidationResp\x12E\n" +
 	"\x0eAuthentication\x12\x18.user_service.v1.AuthReq\x1a\x19.user_service.v1.AuthRespB;Z9github.com/DencCPU/gRPCServices/Protobuf/gen/user_serviceb\x06proto3"
@@ -527,36 +516,35 @@ func file_user_service_user_service_proto_rawDescGZIP() []byte {
 
 var file_user_service_user_service_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_user_service_user_service_proto_goTypes = []any{
-	(*CreateUserReq)(nil),         // 0: user_service.v1.CreateUserReq
-	(*CreateUserResp)(nil),        // 1: user_service.v1.CreateUserResp
+	(*RegistrationUserReq)(nil),   // 0: user_service.v1.RegistrationUserReq
+	(*RegistrationUserResp)(nil),  // 1: user_service.v1.RegistrationUserResp
 	(*UpdateTokensReq)(nil),       // 2: user_service.v1.UpdateTokensReq
 	(*UpdateTokensResp)(nil),      // 3: user_service.v1.UpdateTokensResp
 	(*ValidationReq)(nil),         // 4: user_service.v1.ValidationReq
 	(*ValidationResp)(nil),        // 5: user_service.v1.ValidationResp
 	(*AuthReq)(nil),               // 6: user_service.v1.AuthReq
 	(*AuthResp)(nil),              // 7: user_service.v1.AuthResp
-	(common.UserRole)(0),          // 8: common.UserRole
-	(*timestamppb.Timestamp)(nil), // 9: google.protobuf.Timestamp
+	(*timestamppb.Timestamp)(nil), // 8: google.protobuf.Timestamp
+	(common.UserRole)(0),          // 9: common.UserRole
 }
 var file_user_service_user_service_proto_depIdxs = []int32{
-	8, // 0: user_service.v1.CreateUserReq.user_role:type_name -> common.UserRole
-	9, // 1: user_service.v1.CreateUserResp.expire_at:type_name -> google.protobuf.Timestamp
-	9, // 2: user_service.v1.UpdateTokensResp.expire_at:type_name -> google.protobuf.Timestamp
-	8, // 3: user_service.v1.ValidationResp.role:type_name -> common.UserRole
-	9, // 4: user_service.v1.AuthResp.expire_at:type_name -> google.protobuf.Timestamp
-	0, // 5: user_service.v1.UserService.CreateUser:input_type -> user_service.v1.CreateUserReq
-	2, // 6: user_service.v1.UserService.UpdateTokens:input_type -> user_service.v1.UpdateTokensReq
-	4, // 7: user_service.v1.UserService.ValidationTokens:input_type -> user_service.v1.ValidationReq
-	6, // 8: user_service.v1.UserService.Authentication:input_type -> user_service.v1.AuthReq
-	1, // 9: user_service.v1.UserService.CreateUser:output_type -> user_service.v1.CreateUserResp
-	3, // 10: user_service.v1.UserService.UpdateTokens:output_type -> user_service.v1.UpdateTokensResp
-	5, // 11: user_service.v1.UserService.ValidationTokens:output_type -> user_service.v1.ValidationResp
-	7, // 12: user_service.v1.UserService.Authentication:output_type -> user_service.v1.AuthResp
-	9, // [9:13] is the sub-list for method output_type
-	5, // [5:9] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	8, // 0: user_service.v1.RegistrationUserResp.expire_at:type_name -> google.protobuf.Timestamp
+	8, // 1: user_service.v1.UpdateTokensResp.expire_at:type_name -> google.protobuf.Timestamp
+	9, // 2: user_service.v1.ValidationResp.role:type_name -> common.UserRole
+	8, // 3: user_service.v1.AuthResp.expire_at:type_name -> google.protobuf.Timestamp
+	0, // 4: user_service.v1.UserService.RegistrationNewUser:input_type -> user_service.v1.RegistrationUserReq
+	2, // 5: user_service.v1.UserService.UpdateTokens:input_type -> user_service.v1.UpdateTokensReq
+	4, // 6: user_service.v1.UserService.ValidationTokens:input_type -> user_service.v1.ValidationReq
+	6, // 7: user_service.v1.UserService.Authentication:input_type -> user_service.v1.AuthReq
+	1, // 8: user_service.v1.UserService.RegistrationNewUser:output_type -> user_service.v1.RegistrationUserResp
+	3, // 9: user_service.v1.UserService.UpdateTokens:output_type -> user_service.v1.UpdateTokensResp
+	5, // 10: user_service.v1.UserService.ValidationTokens:output_type -> user_service.v1.ValidationResp
+	7, // 11: user_service.v1.UserService.Authentication:output_type -> user_service.v1.AuthResp
+	8, // [8:12] is the sub-list for method output_type
+	4, // [4:8] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_user_service_user_service_proto_init() }

@@ -8,6 +8,7 @@ type Config struct {
 	Notify         Notify         `mapstructure:"notify"`
 	BreakerSetting BreakerSetting `mapstructure:"breakersetting"`
 	OtelCollector  OtelCollector  `mapstructure:"collector"`
+	Kafka          Kafka          `mapstructure:"kafka"`
 }
 
 type Server struct {
@@ -26,6 +27,7 @@ type Postgres struct {
 	Sslmode             string        `mapstructure:"sslmode"`
 	ControlChanSize     int           `mapstructure:"chan_size"`
 	IdempotencyCacheTTL time.Duration `mapstructure:"idepmpotency_cache_ttl"`
+	MarketCacheTTL      time.Duration `mapstructure:"market_cache_ttl"`
 }
 
 type Notify struct {
@@ -45,4 +47,13 @@ type OtelCollector struct {
 	Port            string        `mapstructure:"port"`
 	TracePercentage int           `mapstructure:"trace_percentage"`
 	MetricInterval  time.Duration `mapstructure:"metric_interval"`
+}
+
+type Kafka struct {
+	Brokers  []string      `mapstructure:"brokers"`
+	Topic    string        `mapstructure:"topic"`
+	GroupID  string        `mapstructure:"group_id"`
+	MinBytes int           `mapstructure:"min_bytes"`
+	MaxBytes int           `mapstructure:"max_bytes"`
+	MaxWait  time.Duration `mapstructure:"max_wait"`
 }

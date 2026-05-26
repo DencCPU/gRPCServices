@@ -8,15 +8,17 @@ import (
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
-	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.40.0"
 )
 
 func NewMetricProviderGrpc(ctx context.Context, serverName, collectorHost, collectorPort string, interval time.Duration) (*metric.MeterProvider, error) {
 	//Создание экспортера
-	exporter, err := otlpmetricgrpc.New(ctx,
+	exporter, err := otlpmetricgrpc.New(
+		ctx,
 		otlpmetricgrpc.WithEndpoint(collectorHost+":"+collectorPort),
 		otlpmetricgrpc.WithInsecure(),
 	)
+
 	if err != nil {
 		return nil, err
 	}

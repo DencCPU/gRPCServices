@@ -14,7 +14,7 @@ func init() {
 func (s *Storage) AccessControl(ctx context.Context) string {
 
 	//Добавление названия рынков в слайс
-	var markets = make([]string, 0, len(s.date))
+	var markets = make([]int, 0, len(s.date))
 	for key := range s.date {
 		markets = append(markets, key)
 	}
@@ -34,7 +34,7 @@ func (s *Storage) AccessControl(ctx context.Context) string {
 
 				s.mu.Lock()
 				key := markets[n]
-				if s.date[key].Enable != false { 
+				if s.date[key].Enable != false {
 					s.date[key].Enable = false
 					s.mu.Unlock()
 					break
@@ -46,7 +46,7 @@ func (s *Storage) AccessControl(ctx context.Context) string {
 
 				s.mu.Lock()
 				key := markets[n]
-				if s.date[key].Enable != false { 
+				if s.date[key].Enable != false {
 					s.date[key].Enable = false
 					delete_at := time.Now().Local()
 					s.date[key].DeleteAt = &delete_at
@@ -55,7 +55,7 @@ func (s *Storage) AccessControl(ctx context.Context) string {
 				}
 				s.mu.Unlock()
 
-			case 2: 
+			case 2:
 
 				n := rand.Intn(len(markets))
 

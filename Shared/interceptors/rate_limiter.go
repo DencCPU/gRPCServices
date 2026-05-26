@@ -17,9 +17,16 @@ func RateLimiter(logger *zap.Logger, limiter *rate.Limiter) grpc.UnaryServerInte
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler,
 	) (resp interface{}, err error) {
-		if !limiter.Allow() {
-			logger.Warn("the number of requests has exceeded the limit. The request has been rejected.")
-			return nil, status.Errorf(codes.ResourceExhausted, "the number of requests has exceeded the limit")
+		select {
+		case <-ctx.Done():
+			logger.Error("Context cancel in rate limiter:",
+				zap.Error(ctx.Err()),
+			)
+		default:
+			if !limiter.Allow() {
+				logger.Warn("the number of requests has exceeded the limit. The request has been rejected.")
+				return nil, status.Errorf(codes.ResourceExhausted, "the number of requests has exceeded the limit")
+			}
 		}
 		return handler(ctx, req)
 	}

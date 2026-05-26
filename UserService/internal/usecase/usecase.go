@@ -17,6 +17,7 @@ type Storage interface {
 	UpdatePassword(ctx context.Context, email string, password string) (err error)
 	UpdateRefreshToken(ctx context.Context, token string) (string, error)
 	UpdateExpireAt(ctx context.Context, userId string) (string, error)
+	CheckUser(ctx context.Context, email string) bool
 }
 type JWT interface {
 	CreateAccessToken(userID, email, role string) (accessToken string, expireAt time.Time, err error)

@@ -8,7 +8,7 @@ import (
 	domainusers "github.com/DencCPU/gRPCServices/SpotInstrumentService/internal/domain/users"
 )
 
-func (h *Handlers) ViewMarket(ctx context.Context, req *spot.ViewReq) (*spot.ViewResp, error) {
+func (h *Handlers) ViewMarket(ctx context.Context, req *spot.ViewMarketReq) (*spot.ViewMarketResp, error) {
 	//Validation
 	err := req.Validate()
 	if err != nil {
@@ -24,17 +24,17 @@ func (h *Handlers) ViewMarket(ctx context.Context, req *spot.ViewReq) (*spot.Vie
 
 	output, pageToken, err := h.Service.ViewMarket(ctx, input)
 	if err != nil {
-		return &spot.ViewResp{}, err
+		return &spot.ViewMarketResp{}, err
 	}
 
 	//Формирование ответа
-	resp := &spot.ViewResp{}
-	resp.EnableMarkets = make([]*spot.Markets, 0, len(output))
+	resp := &spot.ViewMarketResp{}
+	resp.EnableMarkets = make([]*spot.Market, 0, len(output))
 
 	for _, el := range output {
-		market := spot.Markets{MarketId: el.ID, MarketName: el.Name}
+		market := spot.Market{MarketId: el.ID, MarketName: el.Name}
 		resp.EnableMarkets = append(resp.EnableMarkets, &market)
 	}
-	resp.PageToken = pageToken
+	resp.NextPageToken = pageToken
 	return resp, nil
 }

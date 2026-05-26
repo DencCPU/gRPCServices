@@ -17,8 +17,6 @@ func (s *Service) RegistrationUser(ctx context.Context, newUser userdomain.User)
 	span.SetAttributes(
 		attribute.String("name", newUser.Name),
 		attribute.String("email", newUser.Email),
-		attribute.String("password", newUser.Password),
-		attribute.String("role:", newUser.Role),
 	)
 
 	pairToken, err := s.userClient.RegistrationUser(ctx, newUser)

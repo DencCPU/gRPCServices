@@ -1,7 +1,6 @@
 package gin
 
 import (
-	"fmt"
 	"net/http"
 
 	userdomain "github.com/DencCPU/gRPCServices/APIGetway/internal/domain/user"
@@ -17,14 +16,16 @@ func (api *GinAPI) RegistrationUser(c *gin.Context) {
 		})
 		return
 	}
+
 	pairToken, err := api.service.RegistrationUser(c.Request.Context(), newUser)
 	if err != nil {
-		fmt.Println(err)
+
 		c.JSON(http.StatusBadGateway, gin.H{
 			"error:": err.Error(),
 		})
 		return
 	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"accsess token": pairToken.AccessToken,
 		"refresh token": pairToken.RefreshToken,

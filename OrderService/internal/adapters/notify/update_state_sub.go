@@ -15,8 +15,8 @@ func (s *StatusStorage) UpdateStatusSubs(ctx context.Context, key orderdomain.Ke
 	go func() {
 		defer wg.Done()
 		var laststatus string
-		tiker := time.NewTicker(s.TikerInterval)
-		defer tiker.Stop()
+		ticker := time.NewTicker(s.TikerInterval)
+		defer ticker.Stop()
 
 		for {
 			select {
@@ -26,7 +26,7 @@ func (s *StatusStorage) UpdateStatusSubs(ctx context.Context, key orderdomain.Ke
 				}
 				return
 
-			case <-tiker.C:
+			case <-ticker.C:
 				status := s.GetStatus(key)
 				if laststatus != status {
 
@@ -43,6 +43,7 @@ func (s *StatusStorage) UpdateStatusSubs(ctx context.Context, key orderdomain.Ke
 		}
 
 	}()
+
 	go func() {
 		wg.Wait()
 	}()

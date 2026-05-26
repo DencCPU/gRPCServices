@@ -12,7 +12,7 @@ type OrderDTO struct {
 	RefMarketId int
 	OrderType   string
 	Price       decimal.Decimal
-	Quantity    int
+	Quantity    int64
 	Status      string
 	RefOrderId  int
 	CreatedAt   time.Time
@@ -37,7 +37,7 @@ type Oreders_idDTO struct {
 func CreatOrderDTO(order orderdomain.Order) *OrderDTO {
 	input := OrderDTO{
 		Price:    order.Price,
-		Quantity: int(order.Quantity),
+		Quantity: order.Quantity,
 	}
 	switch order.OrderType {
 	case orderdomain.ORDER_TYPE_NORMAL:

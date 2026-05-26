@@ -15,7 +15,6 @@ func (s *Service) AuthenticationUser(ctx context.Context, email, password string
 
 	span.SetAttributes(
 		attribute.String("email", email),
-		attribute.String("password", password),
 	)
 
 	authUser, err := s.storage.Authentication(ctx, email, password)
@@ -53,7 +52,6 @@ func (s *Service) AuthenticationUser(ctx context.Context, email, password string
 	)
 
 	span.AddEvent("create access token")
-
 	accessToken, expireAt, err := s.jwt.CreateAccessToken(authUser.ID, email, authUser.Role)
 	if err != nil {
 		s.logger.Error("access token creation error",
@@ -64,9 +62,11 @@ func (s *Service) AuthenticationUser(ctx context.Context, email, password string
 		span.SetStatus(codes.Error, "create access token failed")
 		return tokensdto.PairToken{}, err
 	}
+
 	s.logger.Info("authentication successful",
 		zap.String("spanID:", span.SpanContext().SpanID().String()),
 	)
+
 	span.SetStatus(codes.Ok, "authentication successfully")
 
 	pairToken := tokensdto.NewPairToken(accessToken, refreshToken, expireAt)

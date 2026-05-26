@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// Добавление нового пользоваткля
+// Adding a new user
 func (p *PostgresDB) AddUser(ctx context.Context, newUser domainuser.User) (string, string, error) {
 
 	//Start of transaction
@@ -24,6 +24,7 @@ func (p *PostgresDB) AddUser(ctx context.Context, newUser domainuser.User) (stri
 	if err != nil {
 		return "", "", err
 	}
+
 	hashPassword, err := userhash.HashPassword(newUser.Password)
 	if err != nil {
 		return "", "", err
@@ -103,4 +104,18 @@ func (p *PostgresDB) Authentication(ctx context.Context, email, password string)
 	}
 
 	return output, nil
+}
+
+func (p *PostgresDB) CheckUser(ctx context.Context, email string) bool {
+	var exist bool
+	err := p.QueryRow(ctx, `
+	SELECT EXIST
+	(SELECT * 
+	FROM users 
+	WHERE email = $1)
+	`, email).Scan(&exist)
+	if err != nil {
+		return false
+	}
+	return true
 }

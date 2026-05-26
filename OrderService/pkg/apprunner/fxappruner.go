@@ -3,8 +3,12 @@ package apprunner
 import (
 	"context"
 	"fmt"
+	"sync"
+	"time"
 
 	orderconfig "github.com/DencCPU/gRPCServices/OrderService/config"
+	adapterkafka "github.com/DencCPU/gRPCServices/OrderService/internal/adapters/kafka"
+	"github.com/DencCPU/gRPCServices/OrderService/internal/adapters/kafka/inbox"
 	"github.com/DencCPU/gRPCServices/OrderService/internal/adapters/notify"
 	"github.com/DencCPU/gRPCServices/OrderService/internal/adapters/postgres"
 	spotservice "github.com/DencCPU/gRPCServices/OrderService/internal/adapters/spot_service"
@@ -72,7 +76,9 @@ func ConfigModul() fx.Option {
 				)
 			},
 			func(loader *config.ConfigLoader) (*orderconfig.Config, error) {
-				cfg, err := config.NewConfig[orderconfig.Config](loader)
+				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+				defer cancel()
+				cfg, err := config.NewConfig[orderconfig.Config](ctx, loader)
 				if err != nil {
 					return nil, fmt.Errorf("error getting new config:%w", err)
 				}
@@ -306,12 +312,76 @@ func OtelLogger() fx.Option {
 	)
 }
 
+// Add kafka
+func KafkaModule() fx.Option {
+	return fx.Options(
+		fx.Provide(
+			func(cfg *orderconfig.Config) *adapterkafka.KafkaBroker {
+				return adapterkafka.NewKafkaBroker(cfg.Kafka)
+			},
+			func() *inbox.Inbox {
+				return inbox.NewInbox()
+			},
+		),
+	)
+}
+
 // Add processing service
 func ServiceModule() fx.Option {
 	return fx.Options(
 		fx.Provide(
-			func(storage *postgres.PostgresDB, spotClient *spotservice.Client, notify *notify.StatusStorage, logger *zap.Logger, trace trace.Tracer) *usecase.OrderService {
-				return usecase.NewOrderServ(storage, spotClient, notify, logger, trace)
+			func(storage *postgres.PostgresDB, spotClient *spotservice.Client, notify *notify.StatusStorage, kafka *adapterkafka.KafkaBroker, inbox *inbox.Inbox, logger *zap.Logger, trace trace.Tracer) *usecase.OrderService {
+				return usecase.NewOrderServ(storage, spotClient, notify, kafka, inbox, logger, trace)
+			},
+		),
+		fx.Invoke(
+			func(lc fx.Lifecycle, logger *zap.Logger, service *usecase.OrderService) {
+				errChan := make(chan error, 10)
+				var wg sync.WaitGroup
+				var cancel context.CancelFunc
+
+				lc.Append(fx.Hook{
+					OnStart: func(ctx context.Context) error {
+						largerCtx, c := context.WithCancel(context.Background())
+						cancel = c
+
+						service.MessageConsumer(largerCtx, &wg, errChan)
+
+						wg.Add(1)
+						go func() {
+							defer wg.Done()
+							for err := range errChan {
+								if err != nil && err != context.Canceled {
+									logger.Error("kafka consumer error:",
+										zap.Error(err),
+									)
+								}
+							}
+						}()
+						return nil
+					},
+					OnStop: func(ctx context.Context) error {
+						if cancel != nil {
+							cancel()
+						}
+						done := make(chan struct{})
+
+						go func() {
+							wg.Wait()
+							close(done)
+							close(errChan)
+						}()
+
+						select {
+						case <-done:
+							logger.Info("kafka consumer stopped gracefully")
+							return nil
+						case <-ctx.Done():
+							logger.Warn("kafka consumer shutdown timeout")
+							return ctx.Err()
+						}
+					},
+				})
 			},
 		),
 	)
@@ -396,6 +466,7 @@ func FxAppRunner() (*fx.App, error) {
 		NotifyModul(),
 		JaegerTracerModul(),
 		MetricModul(),
+		KafkaModule(),
 		ServiceModule(),
 		HandlersModule(),
 		GrpcModule(),

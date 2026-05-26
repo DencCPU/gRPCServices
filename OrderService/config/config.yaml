@@ -13,6 +13,7 @@ postgres:
   sslmode: "disable"
   chan_size: 10
   idepmpotency_cache_ttl: 5s
+  market_cache_ttl: 10s
 
 breakersetting:
   name: "OrderService"
@@ -29,3 +30,11 @@ collector:
   port:
   trace_percentage: 100
   metric_interval: 1s
+
+kafka:
+  brokers:
+  topic: "markets"
+  group_id: "order-service-group"
+  min_bytes: 1
+  max_bytes: 1048576
+  max_wait: 10s

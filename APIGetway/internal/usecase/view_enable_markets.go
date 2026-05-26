@@ -12,10 +12,11 @@ import (
 func (s *Service) ViewEnableMarkets(ctx context.Context, input spotservicedto.Input) ([]spotservicedto.Output, error) {
 	ctx, span := s.tracer.Start(ctx, "View markets")
 	defer span.End()
+
 	span.SetAttributes(
 		attribute.String("userID", input.UserID),
-		attribute.Int("PageSize", input.PageSize),
-		attribute.String("PageToken", input.PageToken),
+		attribute.Int("pageSize", input.PageSize),
+		attribute.String("pageToken", input.PageToken),
 	)
 
 	markets, err := s.spotClient.ViewEnableMarkets(ctx, input)

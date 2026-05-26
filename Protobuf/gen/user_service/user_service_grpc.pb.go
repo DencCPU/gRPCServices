@@ -19,17 +19,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserService_CreateUser_FullMethodName       = "/user_service.v1.UserService/CreateUser"
-	UserService_UpdateTokens_FullMethodName     = "/user_service.v1.UserService/UpdateTokens"
-	UserService_ValidationTokens_FullMethodName = "/user_service.v1.UserService/ValidationTokens"
-	UserService_Authentication_FullMethodName   = "/user_service.v1.UserService/Authentication"
+	UserService_RegistrationNewUser_FullMethodName = "/user_service.v1.UserService/RegistrationNewUser"
+	UserService_UpdateTokens_FullMethodName        = "/user_service.v1.UserService/UpdateTokens"
+	UserService_ValidationTokens_FullMethodName    = "/user_service.v1.UserService/ValidationTokens"
+	UserService_Authentication_FullMethodName      = "/user_service.v1.UserService/Authentication"
 )
 
 // UserServiceClient is the client API for UserService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
-	CreateUser(ctx context.Context, in *CreateUserReq, opts ...grpc.CallOption) (*CreateUserResp, error)
+	RegistrationNewUser(ctx context.Context, in *RegistrationUserReq, opts ...grpc.CallOption) (*RegistrationUserResp, error)
 	UpdateTokens(ctx context.Context, in *UpdateTokensReq, opts ...grpc.CallOption) (*UpdateTokensResp, error)
 	ValidationTokens(ctx context.Context, in *ValidationReq, opts ...grpc.CallOption) (*ValidationResp, error)
 	Authentication(ctx context.Context, in *AuthReq, opts ...grpc.CallOption) (*AuthResp, error)
@@ -43,10 +43,10 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
 }
 
-func (c *userServiceClient) CreateUser(ctx context.Context, in *CreateUserReq, opts ...grpc.CallOption) (*CreateUserResp, error) {
+func (c *userServiceClient) RegistrationNewUser(ctx context.Context, in *RegistrationUserReq, opts ...grpc.CallOption) (*RegistrationUserResp, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateUserResp)
-	err := c.cc.Invoke(ctx, UserService_CreateUser_FullMethodName, in, out, cOpts...)
+	out := new(RegistrationUserResp)
+	err := c.cc.Invoke(ctx, UserService_RegistrationNewUser_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func (c *userServiceClient) Authentication(ctx context.Context, in *AuthReq, opt
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
 type UserServiceServer interface {
-	CreateUser(context.Context, *CreateUserReq) (*CreateUserResp, error)
+	RegistrationNewUser(context.Context, *RegistrationUserReq) (*RegistrationUserResp, error)
 	UpdateTokens(context.Context, *UpdateTokensReq) (*UpdateTokensResp, error)
 	ValidationTokens(context.Context, *ValidationReq) (*ValidationResp, error)
 	Authentication(context.Context, *AuthReq) (*AuthResp, error)
@@ -101,8 +101,8 @@ type UserServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedUserServiceServer struct{}
 
-func (UnimplementedUserServiceServer) CreateUser(context.Context, *CreateUserReq) (*CreateUserResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
+func (UnimplementedUserServiceServer) RegistrationNewUser(context.Context, *RegistrationUserReq) (*RegistrationUserResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RegistrationNewUser not implemented")
 }
 func (UnimplementedUserServiceServer) UpdateTokens(context.Context, *UpdateTokensReq) (*UpdateTokensResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateTokens not implemented")
@@ -134,20 +134,20 @@ func RegisterUserServiceServer(s grpc.ServiceRegistrar, srv UserServiceServer) {
 	s.RegisterService(&UserService_ServiceDesc, srv)
 }
 
-func _UserService_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateUserReq)
+func _UserService_RegistrationNewUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegistrationUserReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServiceServer).CreateUser(ctx, in)
+		return srv.(UserServiceServer).RegistrationNewUser(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UserService_CreateUser_FullMethodName,
+		FullMethod: UserService_RegistrationNewUser_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).CreateUser(ctx, req.(*CreateUserReq))
+		return srv.(UserServiceServer).RegistrationNewUser(ctx, req.(*RegistrationUserReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -214,8 +214,8 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*UserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateUser",
-			Handler:    _UserService_CreateUser_Handler,
+			MethodName: "RegistrationNewUser",
+			Handler:    _UserService_RegistrationNewUser_Handler,
 		},
 		{
 			MethodName: "UpdateTokens",

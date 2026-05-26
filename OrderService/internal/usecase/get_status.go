@@ -14,8 +14,8 @@ func (o *OrderService) GetStatus(ctx context.Context, key orderdomain.Key) (orde
 	ctx, span := o.tracer.Start(ctx, "get order status")
 	defer span.End()
 	span.SetAttributes(
-		attribute.String("userID", key.OrderId),
-		attribute.String("OrderID", key.OrderId),
+		attribute.String("userID", key.UserId),
+		attribute.String("orderID", key.OrderId),
 	)
 
 	orderInfo, err := o.storage.GetOrderState(ctx, key)

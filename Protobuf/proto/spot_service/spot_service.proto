@@ -25,11 +25,11 @@ message ViewMarketReq {
 
 //Ответ для ViewMarket
 message ViewMarketResp {
-  repeated Markets enable_markets = 1;
+  repeated Market enable_markets = 1;
   string next_page_token = 2;
 }
 
-message Markets {
+message Market {
   string market_id = 1;
   string market_name = 2;
 }

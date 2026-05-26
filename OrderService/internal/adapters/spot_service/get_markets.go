@@ -16,7 +16,7 @@ import (
 func (s *Client) GetEnableMarkets(ctx context.Context, userID string, userRole orderdomain.UserRole) ([]orderdomain.Market, error) {
 	//Creating a breaker shell over a query
 	result, err := s.breaker.Execute(func() (interface{}, error) {
-		req := spot.ViewReq{
+		req := spot.ViewMarketReq{
 			UserId:    userID,
 			UserRoles: common.UserRole(userRole),
 			PageSize:  0,
@@ -39,7 +39,7 @@ func (s *Client) GetEnableMarkets(ctx context.Context, userID string, userRole o
 	}
 
 	//Casting the result of a safe query to a specific type
-	resp, ok := result.(*spot.ViewResp)
+	resp, ok := result.(*spot.ViewMarketResp)
 	if !ok {
 		return nil, fmt.Errorf("Inappropriate result type:%T", result)
 	}
@@ -52,7 +52,7 @@ func (s *Client) GetEnableMarkets(ctx context.Context, userID string, userRole o
 	//Create the response
 	var output = make([]orderdomain.Market, 0, len(resp.EnableMarkets))
 	for _, em := range resp.EnableMarkets {
-		market := orderdomain.Market{ID: em.MarketId, Name: em.MarketName}
+		market := orderdomain.Market{MarketId: em.MarketId, MarketName: em.MarketName}
 		output = append(output, market)
 	}
 	return output, nil

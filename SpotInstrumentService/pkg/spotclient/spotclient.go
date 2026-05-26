@@ -1,6 +1,9 @@
 package spotclient
 
 import (
+	"context"
+	"time"
+
 	spot "github.com/DencCPU/gRPCServices/Protobuf/gen/spot_service"
 	"github.com/DencCPU/gRPCServices/Shared/config"
 	entryspotservice "github.com/DencCPU/gRPCServices/Shared/enter_points/entry_spot_service"
@@ -22,8 +25,9 @@ func NewClient() (*Client, error) {
 		entryspotservice.PathToLocalEnv,
 		entryspotservice.PathToConfig,
 	)
-
-	cfg, err := config.NewConfig[spotconfig.Config](loader)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	cfg, err := config.NewConfig[spotconfig.Config](ctx, loader)
 	if err != nil {
 		return nil, err
 	}

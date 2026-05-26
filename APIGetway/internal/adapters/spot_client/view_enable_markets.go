@@ -15,7 +15,7 @@ import (
 
 func (c *Client) ViewEnableMarkets(ctx context.Context, input spotservicedto.Input) ([]spotservicedto.Output, error) {
 	result, err := c.breaker.Execute(func() (interface{}, error) {
-		req := spot_service.ViewReq{
+		req := spot_service.ViewMarketReq{
 			UserId:    input.UserID,
 			PageSize:  int32(input.PageSize),
 			PageToken: input.PageToken,
@@ -44,7 +44,7 @@ func (c *Client) ViewEnableMarkets(ctx context.Context, input spotservicedto.Inp
 		return nil, err
 	}
 
-	resp, ok := result.(*spot_service.ViewResp)
+	resp, ok := result.(*spot_service.ViewMarketResp)
 	if !ok {
 		return nil, fmt.Errorf("Inappropriate result type:%T", result)
 	}

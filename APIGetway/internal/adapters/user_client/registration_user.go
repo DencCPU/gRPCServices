@@ -7,7 +7,6 @@ import (
 
 	"github.com/DencCPU/gRPCServices/APIGetway/internal/adapters/dto/tokens"
 	userdomain "github.com/DencCPU/gRPCServices/APIGetway/internal/domain/user"
-	"github.com/DencCPU/gRPCServices/Protobuf/gen/common"
 	"github.com/DencCPU/gRPCServices/Protobuf/gen/user_service"
 	"github.com/sony/gobreaker"
 	"google.golang.org/grpc/codes"
@@ -16,13 +15,13 @@ import (
 
 func (c *Client) RegistrationUser(ctx context.Context, newUser userdomain.User) (tokens.PairToken, error) {
 	result, err := c.breaker.Execute(func() (interface{}, error) {
-		req := &user_service.CreateUserReq{
+		req := &user_service.RegistrationUserReq{
 			Name:     newUser.Name,
 			Email:    newUser.Email,
 			Password: newUser.Password,
-			UserRole: common.UserRole_USER_ROLE_BASIC_USER,
 		}
-		resp, err := c.CreateUser(ctx, req)
+
+		resp, err := c.RegistrationNewUser(ctx, req)
 		if err != nil {
 			return tokens.PairToken{}, err
 		}
@@ -39,7 +38,7 @@ func (c *Client) RegistrationUser(ctx context.Context, newUser userdomain.User) 
 		}
 		return tokens.PairToken{}, err
 	}
-	resp, ok := result.(*user_service.CreateUserResp)
+	resp, ok := result.(*user_service.RegistrationUserResp)
 	if !ok {
 		return tokens.PairToken{}, fmt.Errorf("Inappropriate result type:%T", result)
 	}

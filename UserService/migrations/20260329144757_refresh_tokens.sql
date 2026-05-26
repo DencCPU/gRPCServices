@@ -9,6 +9,9 @@ CREATE TABLE IF NOT EXISTS refresh_tokens(
     created_at TIMESTAMPTZ NOT NULL,
     update_at TIMESTAMPTZ 
 );
+
+CREATE INDEX idx_refresh_tokens_token ON refresh_tokens(token);
+CREATE INDEX idx_refresh_tokens_user_id ON refresh_tokens(user_id);
 -- +goose StatementEnd
 
 -- +goose Down

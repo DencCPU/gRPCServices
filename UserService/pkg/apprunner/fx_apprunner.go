@@ -3,6 +3,7 @@ package apprunner
 import (
 	"context"
 	"fmt"
+	"time"
 
 	user "github.com/DencCPU/gRPCServices/Protobuf/gen/user_service"
 	"github.com/DencCPU/gRPCServices/Shared/config"
@@ -65,7 +66,9 @@ func ConfigModul() fx.Option {
 			return loader
 		},
 		func(loader *config.ConfigLoader) (*userconfig.Config, error) {
-			config, err := config.NewConfig[userconfig.Config](loader)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			config, err := config.NewConfig[userconfig.Config](ctx, loader)
 			if err != nil {
 				return nil, fmt.Errorf("error getting config:%w", err)
 			}

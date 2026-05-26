@@ -69,7 +69,9 @@ func ConfigModul() fx.Option {
 				)
 			},
 			func(loader *config.ConfigLoader) (*apiconfig.Config, error) {
-				cfg, err := config.NewConfig[apiconfig.Config](loader)
+				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+				defer cancel()
+				cfg, err := config.NewConfig[apiconfig.Config](ctx, loader)
 				if err != nil {
 					return nil, fmt.Errorf("error getting new config:%w", err)
 				}

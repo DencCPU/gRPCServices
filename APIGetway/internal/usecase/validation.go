@@ -4,7 +4,6 @@ import (
 	"context"
 
 	userservicedto "github.com/DencCPU/gRPCServices/APIGetway/internal/adapters/dto/user_service"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.uber.org/zap"
 )
@@ -12,10 +11,6 @@ import (
 func (s *Service) Validation(ctx context.Context, accessToken string) (userservicedto.Output, error) {
 	ctx, span := s.tracer.Start(ctx, "Validation access token")
 	defer span.End()
-
-	span.SetAttributes(
-		attribute.String("access token:", accessToken),
-	)
 
 	output, err := s.userClient.Validation(ctx, accessToken)
 	if err != nil {

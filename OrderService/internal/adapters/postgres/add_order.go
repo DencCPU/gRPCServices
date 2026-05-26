@@ -15,29 +15,30 @@ import (
 )
 
 // Добавление заказа в БД (таблица orers)
-func (p *PostgresDB) AddOrderStorage(ctx context.Context, newOrder orderdomain.Order, markets []orderdomain.Market) (string, string, error) {
+func (p *PostgresDB) AddOrderStorage(ctx context.Context, newOrder orderdomain.Order) (string, string, error) {
 
 	dto := postgresdto.CreatOrderDTO(newOrder)
 
-	//Начало транзакции
+	//Transaction begin
 	tx, err := p.db.Begin(ctx)
 	if err != nil {
 		return "", "", fmt.Errorf("error starting transaction:%w", err)
 	}
 
-	//Добавление ID заказа
-	refOrderId, orderID, err := p.AddOrderID(tx, ctx, newOrder, markets)
+	//Add orderID to database
+	refOrderId, orderID, err := p.AddOrderID(tx, ctx, newOrder)
 	if err != nil {
 		return "", "", fmt.Errorf("error adding OrderID:%w", err)
 	}
-	//Добавление пользователя
+
+	//Add user to database
 	refUserID, err := p.AddUserID(tx, ctx, newOrder)
 	if err != nil {
 		return "", "", fmt.Errorf("error adding UserID:%w", err)
 	}
 
-	//Добавление рынка
-	refMarketID, err := p.AddMarketID(tx, ctx, newOrder, markets)
+	//Add market to database
+	refMarketID, err := p.AddMarketID(tx, ctx, newOrder)
 	if err != nil {
 		return "", "", fmt.Errorf("error adding UserID:%w", err)
 	}
@@ -77,19 +78,25 @@ func (p *PostgresDB) AddOrderStorage(ctx context.Context, newOrder orderdomain.O
 
 	p.controlOrderChan <- orderInfo
 
-	defer tx.Rollback(ctx)
-	return orderID, orderStatus, tx.Commit(ctx)
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback(ctx)
+		}
+	}()
+
+	if err = tx.Commit(ctx); err != nil {
+		return "", "", err
+	}
+	return orderID, orderStatus, nil
 }
 
 // Добавленение рынка в БД (таблица markets)
-func (p *PostgresDB) AddMarketID(tx pgx.Tx, ctx context.Context, newOrder orderdomain.Order, markets []orderdomain.Market) (int, error) {
+func (p *PostgresDB) AddMarketID(tx pgx.Tx, ctx context.Context, newOrder orderdomain.Order) (int, error) {
 	var marketName string
 
-	for _, m := range markets {
-		if m.ID == newOrder.MarketId {
-			marketName = m.Name
-		}
-	}
+	p.marketMu.RLock()
+	marketName = p.marketCache[newOrder.MarketId].MarketName
+	p.marketMu.RUnlock()
 
 	//Инициализация DTO
 	dto := postgresdto.CreateMarketDTO(newOrder.MarketId, marketName)
@@ -115,17 +122,21 @@ func (p *PostgresDB) AddMarketID(tx pgx.Tx, ctx context.Context, newOrder orderd
 	return id, nil
 }
 
-// Добавление OrderID в БД (таблица orders_id)
-func (p *PostgresDB) AddOrderID(tx pgx.Tx, ctx context.Context, newOrder orderdomain.Order, markets []orderdomain.Market) (int, string, error) {
+// Add orderID to database (orders_id table)
+func (p *PostgresDB) AddOrderID(tx pgx.Tx, ctx context.Context, newOrder orderdomain.Order) (int, string, error) {
 
-	var foundMarket bool //Флаг, показывающий найден нужный рынок или нет
+	var foundMarket bool //fing market flag
 
-	//Проверка наличия нужного рынка
-	for _, m := range markets {
-		if m.ID == newOrder.MarketId {
+	//Check market cache
+	for _, m := range p.marketCache {
+		p.marketMu.RLock()
+
+		if m.MarketId == newOrder.MarketId && m.UserAccess == newOrder.UserRole {
 			foundMarket = true
 			break
 		}
+
+		p.marketMu.RUnlock()
 	}
 	if foundMarket != true {
 		return 0, "", ordererrors.Avalible_markets
@@ -135,11 +146,11 @@ func (p *PostgresDB) AddOrderID(tx pgx.Tx, ctx context.Context, newOrder orderdo
 	var orderID string
 	orderID = uuid.New().String()
 
-	//Ининциализация DTO
+	//DTO
 	dto := postgresdto.CreateOrders_idDTO(orderID)
 	dto.CreatedAt = time.Now()
 
-	//Запись в БД
+	//Add record to database
 	var id int
 	err := tx.QueryRow(ctx, ` 
 	INSERT INTO orders_id(order_id,created_at) 
@@ -157,13 +168,12 @@ func (p *PostgresDB) AddOrderID(tx pgx.Tx, ctx context.Context, newOrder orderdo
 	return id, orderID, nil
 }
 
-// Добавление UserID в БД (таблица users)
+// Add userID to database (users table)
 func (p *PostgresDB) AddUserID(tx pgx.Tx, ctx context.Context, newOrder orderdomain.Order) (int, error) {
-	//Инициализация DTO
+	//DTO
 	dto := postgresdto.CreateUserDTO(newOrder.UserId)
 	dto.CreatedAt = time.Now()
 
-	//Поиск пользователя с id
 	var id int
 	err := tx.QueryRow(ctx, `
 		INSERT INTO users (user_id, created_at)

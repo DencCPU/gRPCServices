@@ -7,6 +7,7 @@ type Config struct {
 	Server        Server        `mapstructure:"server"`
 	Storage       Storage       `mapstructure:"storage"`
 	OtelCollector OtelCollector `mapstructure:"collector"`
+	Kafka         Kafka         `mapstructure:"kafka"`
 }
 
 type Redis struct {
@@ -38,4 +39,17 @@ type OtelCollector struct {
 	Port            string        `mapstructure:"port"`
 	TracePercentage int           `mapstructure:"trace_percentage"`
 	MetricInterval  time.Duration `mapstructure:"metric_interval"`
+}
+
+type Kafka struct {
+	Host               string        `mapstructure:"host"`
+	Port               string        `mapstructure:"port"`
+	Topic              string        `mapstructure:"topic"`
+	MaxAttempts        int           `mapstructure:"max_attempts"`
+	WriteBackoffMin    time.Duration `mapstructure:"write_backoff_min"`
+	WriteBackoffMax    time.Duration `mapstructure:"write_backoff_max"`
+	BatchSize          int           `mapstructure:"batch_size"`
+	BatchBytes         int64         `mapstructure:"batch_bytes"`
+	GetMarketsInterval time.Duration `mapstructure:"get_markets_interval"`
+	RelayInterval      time.Duration `mapstructure:"relay_interval"`
 }

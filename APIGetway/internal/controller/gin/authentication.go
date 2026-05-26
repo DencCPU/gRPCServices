@@ -1,7 +1,6 @@
 package gin
 
 import (
-	"fmt"
 	"net/http"
 
 	userdomain "github.com/DencCPU/gRPCServices/APIGetway/internal/domain/user"
@@ -19,7 +18,7 @@ func (api *GinAPI) Authentication(c *gin.Context) {
 	}
 	pairToken, err := api.service.Authentication(c.Request.Context(), user.Email, user.Password)
 	if err != nil {
-		fmt.Println(err)
+
 		c.JSON(http.StatusBadGateway, gin.H{
 			"error:": err.Error(),
 		})

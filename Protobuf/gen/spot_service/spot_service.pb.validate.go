@@ -42,21 +42,22 @@ var (
 // define the regex for a UUID once up-front
 var _spot_service_uuidPattern = regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 
-// Validate checks the field values on ViewReq with the rules defined in the
-// proto definition for this message. If any rules are violated, the first
+// Validate checks the field values on ViewMarketReq with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *ViewReq) Validate() error {
+func (m *ViewMarketReq) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on ViewReq with the rules defined in the
-// proto definition for this message. If any rules are violated, the result is
-// a list of violation errors wrapped in ViewReqMultiError, or nil if none found.
-func (m *ViewReq) ValidateAll() error {
+// ValidateAll checks the field values on ViewMarketReq with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in ViewMarketReqMultiError, or
+// nil if none found.
+func (m *ViewMarketReq) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *ViewReq) validate(all bool) error {
+func (m *ViewMarketReq) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -66,7 +67,7 @@ func (m *ViewReq) validate(all bool) error {
 	// no validation rules for UserRoles
 
 	if err := m._validateUuid(m.GetUserId()); err != nil {
-		err = ViewReqValidationError{
+		err = ViewMarketReqValidationError{
 			field:  "UserId",
 			reason: "value must be a valid UUID",
 			cause:  err,
@@ -78,7 +79,7 @@ func (m *ViewReq) validate(all bool) error {
 	}
 
 	if val := m.GetPageSize(); val < 0 || val > 50 {
-		err := ViewReqValidationError{
+		err := ViewMarketReqValidationError{
 			field:  "PageSize",
 			reason: "value must be inside range [0, 50]",
 		}
@@ -91,13 +92,13 @@ func (m *ViewReq) validate(all bool) error {
 	// no validation rules for PageToken
 
 	if len(errors) > 0 {
-		return ViewReqMultiError(errors)
+		return ViewMarketReqMultiError(errors)
 	}
 
 	return nil
 }
 
-func (m *ViewReq) _validateUuid(uuid string) error {
+func (m *ViewMarketReq) _validateUuid(uuid string) error {
 	if matched := _spot_service_uuidPattern.MatchString(uuid); !matched {
 		return errors.New("invalid uuid format")
 	}
@@ -105,12 +106,13 @@ func (m *ViewReq) _validateUuid(uuid string) error {
 	return nil
 }
 
-// ViewReqMultiError is an error wrapping multiple validation errors returned
-// by ViewReq.ValidateAll() if the designated constraints aren't met.
-type ViewReqMultiError []error
+// ViewMarketReqMultiError is an error wrapping multiple validation errors
+// returned by ViewMarketReq.ValidateAll() if the designated constraints
+// aren't met.
+type ViewMarketReqMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m ViewReqMultiError) Error() string {
+func (m ViewMarketReqMultiError) Error() string {
 	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -119,11 +121,11 @@ func (m ViewReqMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m ViewReqMultiError) AllErrors() []error { return m }
+func (m ViewMarketReqMultiError) AllErrors() []error { return m }
 
-// ViewReqValidationError is the validation error returned by ViewReq.Validate
-// if the designated constraints aren't met.
-type ViewReqValidationError struct {
+// ViewMarketReqValidationError is the validation error returned by
+// ViewMarketReq.Validate if the designated constraints aren't met.
+type ViewMarketReqValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -131,22 +133,22 @@ type ViewReqValidationError struct {
 }
 
 // Field function returns field value.
-func (e ViewReqValidationError) Field() string { return e.field }
+func (e ViewMarketReqValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e ViewReqValidationError) Reason() string { return e.reason }
+func (e ViewMarketReqValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e ViewReqValidationError) Cause() error { return e.cause }
+func (e ViewMarketReqValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e ViewReqValidationError) Key() bool { return e.key }
+func (e ViewMarketReqValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e ViewReqValidationError) ErrorName() string { return "ViewReqValidationError" }
+func (e ViewMarketReqValidationError) ErrorName() string { return "ViewMarketReqValidationError" }
 
 // Error satisfies the builtin error interface
-func (e ViewReqValidationError) Error() string {
+func (e ViewMarketReqValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -158,14 +160,14 @@ func (e ViewReqValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sViewReq.%s: %s%s",
+		"invalid %sViewMarketReq.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = ViewReqValidationError{}
+var _ error = ViewMarketReqValidationError{}
 
 var _ interface {
 	Field() string
@@ -173,24 +175,24 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = ViewReqValidationError{}
+} = ViewMarketReqValidationError{}
 
-// Validate checks the field values on ViewResp with the rules defined in the
-// proto definition for this message. If any rules are violated, the first
+// Validate checks the field values on ViewMarketResp with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *ViewResp) Validate() error {
+func (m *ViewMarketResp) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on ViewResp with the rules defined in
-// the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in ViewRespMultiError, or nil
-// if none found.
-func (m *ViewResp) ValidateAll() error {
+// ValidateAll checks the field values on ViewMarketResp with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in ViewMarketRespMultiError,
+// or nil if none found.
+func (m *ViewMarketResp) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *ViewResp) validate(all bool) error {
+func (m *ViewMarketResp) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -204,7 +206,7 @@ func (m *ViewResp) validate(all bool) error {
 			switch v := interface{}(item).(type) {
 			case interface{ ValidateAll() error }:
 				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, ViewRespValidationError{
+					errors = append(errors, ViewMarketRespValidationError{
 						field:  fmt.Sprintf("EnableMarkets[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -212,7 +214,7 @@ func (m *ViewResp) validate(all bool) error {
 				}
 			case interface{ Validate() error }:
 				if err := v.Validate(); err != nil {
-					errors = append(errors, ViewRespValidationError{
+					errors = append(errors, ViewMarketRespValidationError{
 						field:  fmt.Sprintf("EnableMarkets[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -221,7 +223,7 @@ func (m *ViewResp) validate(all bool) error {
 			}
 		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return ViewRespValidationError{
+				return ViewMarketRespValidationError{
 					field:  fmt.Sprintf("EnableMarkets[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -231,21 +233,22 @@ func (m *ViewResp) validate(all bool) error {
 
 	}
 
-	// no validation rules for PageToken
+	// no validation rules for NextPageToken
 
 	if len(errors) > 0 {
-		return ViewRespMultiError(errors)
+		return ViewMarketRespMultiError(errors)
 	}
 
 	return nil
 }
 
-// ViewRespMultiError is an error wrapping multiple validation errors returned
-// by ViewResp.ValidateAll() if the designated constraints aren't met.
-type ViewRespMultiError []error
+// ViewMarketRespMultiError is an error wrapping multiple validation errors
+// returned by ViewMarketResp.ValidateAll() if the designated constraints
+// aren't met.
+type ViewMarketRespMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m ViewRespMultiError) Error() string {
+func (m ViewMarketRespMultiError) Error() string {
 	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -254,11 +257,11 @@ func (m ViewRespMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m ViewRespMultiError) AllErrors() []error { return m }
+func (m ViewMarketRespMultiError) AllErrors() []error { return m }
 
-// ViewRespValidationError is the validation error returned by
-// ViewResp.Validate if the designated constraints aren't met.
-type ViewRespValidationError struct {
+// ViewMarketRespValidationError is the validation error returned by
+// ViewMarketResp.Validate if the designated constraints aren't met.
+type ViewMarketRespValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -266,22 +269,22 @@ type ViewRespValidationError struct {
 }
 
 // Field function returns field value.
-func (e ViewRespValidationError) Field() string { return e.field }
+func (e ViewMarketRespValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e ViewRespValidationError) Reason() string { return e.reason }
+func (e ViewMarketRespValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e ViewRespValidationError) Cause() error { return e.cause }
+func (e ViewMarketRespValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e ViewRespValidationError) Key() bool { return e.key }
+func (e ViewMarketRespValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e ViewRespValidationError) ErrorName() string { return "ViewRespValidationError" }
+func (e ViewMarketRespValidationError) ErrorName() string { return "ViewMarketRespValidationError" }
 
 // Error satisfies the builtin error interface
-func (e ViewRespValidationError) Error() string {
+func (e ViewMarketRespValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -293,14 +296,14 @@ func (e ViewRespValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sViewResp.%s: %s%s",
+		"invalid %sViewMarketResp.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = ViewRespValidationError{}
+var _ error = ViewMarketRespValidationError{}
 
 var _ interface {
 	Field() string
@@ -308,23 +311,23 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = ViewRespValidationError{}
+} = ViewMarketRespValidationError{}
 
-// Validate checks the field values on Markets with the rules defined in the
+// Validate checks the field values on Market with the rules defined in the
 // proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *Markets) Validate() error {
+func (m *Market) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on Markets with the rules defined in the
+// ValidateAll checks the field values on Market with the rules defined in the
 // proto definition for this message. If any rules are violated, the result is
-// a list of violation errors wrapped in MarketsMultiError, or nil if none found.
-func (m *Markets) ValidateAll() error {
+// a list of violation errors wrapped in MarketMultiError, or nil if none found.
+func (m *Market) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *Markets) validate(all bool) error {
+func (m *Market) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -336,18 +339,18 @@ func (m *Markets) validate(all bool) error {
 	// no validation rules for MarketName
 
 	if len(errors) > 0 {
-		return MarketsMultiError(errors)
+		return MarketMultiError(errors)
 	}
 
 	return nil
 }
 
-// MarketsMultiError is an error wrapping multiple validation errors returned
-// by Markets.ValidateAll() if the designated constraints aren't met.
-type MarketsMultiError []error
+// MarketMultiError is an error wrapping multiple validation errors returned by
+// Market.ValidateAll() if the designated constraints aren't met.
+type MarketMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m MarketsMultiError) Error() string {
+func (m MarketMultiError) Error() string {
 	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -356,11 +359,11 @@ func (m MarketsMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m MarketsMultiError) AllErrors() []error { return m }
+func (m MarketMultiError) AllErrors() []error { return m }
 
-// MarketsValidationError is the validation error returned by Markets.Validate
-// if the designated constraints aren't met.
-type MarketsValidationError struct {
+// MarketValidationError is the validation error returned by Market.Validate if
+// the designated constraints aren't met.
+type MarketValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -368,22 +371,22 @@ type MarketsValidationError struct {
 }
 
 // Field function returns field value.
-func (e MarketsValidationError) Field() string { return e.field }
+func (e MarketValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e MarketsValidationError) Reason() string { return e.reason }
+func (e MarketValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e MarketsValidationError) Cause() error { return e.cause }
+func (e MarketValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e MarketsValidationError) Key() bool { return e.key }
+func (e MarketValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e MarketsValidationError) ErrorName() string { return "MarketsValidationError" }
+func (e MarketValidationError) ErrorName() string { return "MarketValidationError" }
 
 // Error satisfies the builtin error interface
-func (e MarketsValidationError) Error() string {
+func (e MarketValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -395,14 +398,14 @@ func (e MarketsValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sMarkets.%s: %s%s",
+		"invalid %sMarket.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = MarketsValidationError{}
+var _ error = MarketValidationError{}
 
 var _ interface {
 	Field() string
@@ -410,4 +413,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = MarketsValidationError{}
+} = MarketValidationError{}

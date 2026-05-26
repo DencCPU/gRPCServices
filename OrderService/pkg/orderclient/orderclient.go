@@ -1,7 +1,9 @@
 package orderclient
 
 import (
+	"context"
 	"fmt"
+	"time"
 
 	orderconfig "github.com/DencCPU/gRPCServices/OrderService/config"
 	order "github.com/DencCPU/gRPCServices/Protobuf/gen/order_service"
@@ -23,7 +25,9 @@ func NewClient() (*Client, error) {
 		entryorderservice.PathToLocalEnv,
 		entryorderservice.PathToConfig,
 	)
-	cfg, err := config.NewConfig[orderconfig.Config](loader)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	cfg, err := config.NewConfig[orderconfig.Config](ctx, loader)
 	if err != nil {
 
 		return nil, fmt.Errorf("Ошибка получения конфига:%w", err)

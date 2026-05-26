@@ -14,7 +14,7 @@ func (s *Service) GetOrderStatus(ctx context.Context, input orderdto.GetInput) (
 	defer span.End()
 	span.SetAttributes(
 		attribute.String("userID", input.OrderId),
-		attribute.String("OrderID", input.OrderId),
+		attribute.String("orderID", input.OrderId),
 	)
 
 	output, err := s.orderClient.GetStatus(ctx, input)

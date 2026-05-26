@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/DencCPU/gRPCServices/UserService/internal/adapters/dto/user"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.uber.org/zap"
 )
@@ -13,9 +12,7 @@ import (
 func (s *Service) Validation(ctx context.Context, accessToken string) (user.Output, error) {
 	ctx, span := s.tracer.Start(ctx, "validation token")
 	defer span.End()
-	span.SetAttributes(
-		attribute.String("access token:", accessToken),
-	)
+
 	output, err := s.jwt.Validation(accessToken)
 	if err != nil {
 		s.logger.Error("token validation error:",
@@ -28,6 +25,7 @@ func (s *Service) Validation(ctx context.Context, accessToken string) (user.Outp
 
 	if output.Role == "" || output.UserId == "" {
 		s.logger.Error("data from token was not received")
+
 		span.RecordError(errors.New("data from token was not received"))
 		span.SetStatus(codes.Error, "data from token was not received")
 

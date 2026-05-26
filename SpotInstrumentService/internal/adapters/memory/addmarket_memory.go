@@ -29,10 +29,9 @@ func (s *Storage) AddMarkets(path string) error {
 	if len(markets) == 0 {
 		return errors.New("market list is empty")
 	}
-	s.keys = make([]string, 0, len(markets))
 
 	rand.Seed(time.Now().Unix())
-	for _, name := range markets {
+	for i, name := range markets {
 		id := uuid.New().String()
 
 		var userAccess domainusers.UserRole
@@ -43,9 +42,8 @@ func (s *Storage) AddMarkets(path string) error {
 			userAccess = domainusers.USER_ROLE_PREMIUM_USER
 		}
 
-		s.date[id] = &domainmarket.Market{ID: id, Name: name, Enable: true, DeleteAt: nil, UserAccess: userAccess}
-		fmt.Println("Added userRole:", s.date[id])
-		s.keys = append(s.keys, id)
+		s.date[i] = &domainmarket.Market{ID: id, Name: name, Enable: true, DeleteAt: nil, UserAccess: userAccess}
+		fmt.Println("Added userRole:", s.date[i])
 	}
 
 	return nil

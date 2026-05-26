@@ -5,10 +5,10 @@ import (
 )
 
 func (p *PostgresDB) IdempotencyCheck(idepotencyKey string) bool {
-	p.cacheMu.RLock()
-	defer p.cacheMu.RUnlock()
+	p.idempotencyCacheMu.RLock()
+	defer p.idempotencyCacheMu.RUnlock()
 	if _, exist := p.idempotecyCache[idepotencyKey]; !exist {
-		p.idempotecyCache[idepotencyKey] = time.Now().Add(p.cacheTTL)
+		p.idempotecyCache[idepotencyKey] = time.Now().Add(p.idempotencyCacheTTL)
 		return true
 	}
 	return false
@@ -20,7 +20,7 @@ func (p *PostgresDB) CheckCacheTTL() {
 	go func() {
 		defer p.wg.Done()
 
-		ticker := time.NewTicker(p.cacheTTL)
+		ticker := time.NewTicker(p.idempotencyCacheTTL)
 		defer ticker.Stop()
 
 		for {
@@ -29,11 +29,11 @@ func (p *PostgresDB) CheckCacheTTL() {
 				return
 			case <-ticker.C:
 				for key, ttl := range p.idempotecyCache {
-					p.cacheMu.Lock()
+					p.idempotencyCacheMu.Lock()
 					if time.Now().After(ttl) {
 						delete(p.idempotecyCache, key)
 					}
-					p.cacheMu.Unlock()
+					p.idempotencyCacheMu.Unlock()
 				}
 			}
 		}

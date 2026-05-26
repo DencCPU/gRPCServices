@@ -3,6 +3,8 @@ package apprunner
 import (
 	"context"
 	"fmt"
+	"sync"
+	"time"
 
 	spot "github.com/DencCPU/gRPCServices/Protobuf/gen/spot_service"
 	"github.com/DencCPU/gRPCServices/Shared/config"
@@ -10,6 +12,8 @@ import (
 	"github.com/DencCPU/gRPCServices/Shared/logger"
 	"github.com/DencCPU/gRPCServices/Shared/opentelemetry"
 	spotconfig "github.com/DencCPU/gRPCServices/SpotInstrumentService/config"
+	adapterkafka "github.com/DencCPU/gRPCServices/SpotInstrumentService/internal/adapters/kafka"
+	"github.com/DencCPU/gRPCServices/SpotInstrumentService/internal/adapters/kafka/outbox"
 	"github.com/DencCPU/gRPCServices/SpotInstrumentService/internal/adapters/memory"
 	redisadapter "github.com/DencCPU/gRPCServices/SpotInstrumentService/internal/adapters/redis"
 	spothandlers "github.com/DencCPU/gRPCServices/SpotInstrumentService/internal/controllers/grpc_handlers"
@@ -111,7 +115,9 @@ func NewConfigModul() fx.Option {
 			return loader
 		},
 		func(loader *config.ConfigLoader) (*spotconfig.Config, error) {
-			config, err := config.NewConfig[spotconfig.Config](loader)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			config, err := config.NewConfig[spotconfig.Config](ctx, loader)
 			if err != nil {
 				return nil, fmt.Errorf("error getting config:%w", err)
 			}
@@ -252,12 +258,77 @@ func OtelLogger() fx.Option {
 	)
 }
 
+// Add kafka-outbox
+func KafkaModule() fx.Option {
+	return fx.Options(
+		fx.Provide(
+			func(cfg *spotconfig.Config) *adapterkafka.KafkaBroker {
+				return adapterkafka.NewKafkaBroker(cfg.Kafka)
+			},
+			func() *outbox.Outbox {
+				return outbox.NewOutbox()
+			},
+		),
+	)
+}
+
 // Add processing service
 func ServiceModule() fx.Option {
-	return fx.Provide(
-		func(storage *memory.Storage, logger *zap.Logger, trace trace.Tracer) *usecase.SpotService {
-			return usecase.NewSpotInstrument(storage, logger, trace)
-		},
+	return fx.Options(
+		fx.Provide(
+			func(storage *memory.Storage, logger *zap.Logger, kafka *adapterkafka.KafkaBroker, outbox *outbox.Outbox, trace trace.Tracer) *usecase.SpotService {
+				return usecase.NewSpotInstrument(storage, kafka, outbox, logger, trace)
+			},
+		),
+		fx.Invoke(
+			func(lc fx.Lifecycle, cfg *spotconfig.Config, service *usecase.SpotService, logger *zap.Logger) {
+				errChan := make(chan error, 10)
+				var wg sync.WaitGroup
+				var cancel context.CancelFunc
+
+				lc.Append(fx.Hook{
+					OnStart: func(ctx context.Context) error {
+						largeCtx, c := context.WithCancel(context.Background())
+						cancel = c
+
+						service.SendToBroker(largeCtx, &wg, cfg.Kafka.GetMarketsInterval, cfg.Kafka.RelayInterval, errChan)
+						wg.Add(1)
+						go func() {
+							defer wg.Done()
+							for err := range errChan {
+								if err != nil && err != context.Canceled {
+									logger.Error("kafka producer error:",
+										zap.Error(err),
+									)
+								}
+							}
+						}()
+						return nil
+					},
+					OnStop: func(ctx context.Context) error {
+						if cancel != nil {
+							cancel()
+						}
+						done := make(chan struct{})
+
+						go func() {
+							wg.Wait()
+							close(done)
+							close(errChan)
+						}()
+
+						select {
+						case <-done:
+							logger.Info("kafka producer stopped gracefully")
+							return nil
+						case <-ctx.Done():
+							logger.Warn("kafka producer shutdown timeout")
+							return ctx.Err()
+						}
+					},
+				})
+			},
+		),
 	)
 }
 
@@ -337,6 +408,7 @@ func FxAppRunner() (*fx.App, error) {
 		TracingModule(),
 		MetricModul(),
 		OtelLogger(),
+		KafkaModule(),
 		ServiceModule(),
 		HandlersModule(),
 		GrpcModule(),

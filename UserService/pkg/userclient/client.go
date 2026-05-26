@@ -1,7 +1,9 @@
 package userclient
 
 import (
+	"context"
 	"fmt"
+	"time"
 
 	user "github.com/DencCPU/gRPCServices/Protobuf/gen/user_service"
 	"github.com/DencCPU/gRPCServices/Shared/config"
@@ -23,7 +25,9 @@ func NewClient() (*Client, error) {
 		entryuserservice.PathToLocalEnv,
 		entryuserservice.PathToConfig,
 	)
-	cfg, err := config.NewConfig[userconfig.Config](loader)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	cfg, err := config.NewConfig[userconfig.Config](ctx, loader)
 	if err != nil {
 
 		return nil, fmt.Errorf("Ошибка получения конфига:%w", err)

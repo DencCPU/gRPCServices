@@ -24,28 +24,28 @@ func (s *Storage) GetEnableMarkets(input domainusers.Input) ([]*domainmarket.Mar
 	if input.PageToken == "" {
 		for i = 0; i < size; i++ {
 			s.mu.RLock()
-			key := s.keys[i]
-			if (s.date[key].DeleteAt == nil || s.date[key].Enable == true) && s.date[key].UserAccess == input.UserRole {
-				enableMarkets = append(enableMarkets, s.date[key])
+			if (s.date[i].DeleteAt == nil || s.date[i].Enable == true) && s.date[i].UserAccess == input.UserRole {
+				enableMarkets = append(enableMarkets, s.date[i])
 			}
 			s.mu.RUnlock()
 		}
+
 	} else {
-		for s.keys[i] != input.PageToken {
+
+		for s.date[i].ID != input.PageToken {
 			i++
 		}
 		i++
-		for input.PageSize != 0 && i < len(s.keys) {
+		for input.PageSize != 0 && i < len(s.date) {
 			s.mu.RLock()
-			key := s.keys[i]
-			if (s.date[key].DeleteAt == nil || s.date[key].Enable == true) && s.date[key].UserAccess == input.UserRole {
-				enableMarkets = append(enableMarkets, s.date[key])
+			if (s.date[i].DeleteAt == nil || s.date[i].Enable == true) && s.date[i].UserAccess == input.UserRole {
+				enableMarkets = append(enableMarkets, s.date[i])
 			}
 			input.PageSize--
 			s.mu.RUnlock()
 		}
 	}
 
-	pageToken = s.keys[i-1]
+	pageToken = s.date[i-1].ID
 	return enableMarkets, pageToken
 }

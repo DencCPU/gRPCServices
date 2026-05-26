@@ -1,6 +1,10 @@
 package orderdomain
 
-import "github.com/shopspring/decimal"
+import (
+	"time"
+
+	"github.com/shopspring/decimal"
+)
 
 type UserRole int32
 
@@ -42,8 +46,10 @@ type Key struct {
 }
 
 type Market struct {
-	ID   string
-	Name string
+	MarketId   string
+	MarketName string
+	UserAccess UserRole
+	TTL        time.Time
 }
 
 type OrderInfo struct {

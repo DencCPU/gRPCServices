@@ -15,19 +15,24 @@ import (
 func (c *Client) UpdateAccessToken(ctx context.Context, accessToken, refreshToken string) (tokens.PairToken, error) {
 	result, err := c.breaker.Execute(func() (interface{}, error) {
 		req := user.UpdateTokensReq{AccessToken: accessToken, RefreshToken: refreshToken}
+
 		resp, err := c.UpdateTokens(ctx, &req)
 		if err != nil {
 			return tokens.PairToken{}, err
 		}
+
 		if resp.AccessToken == "" || resp.RefreshToken == "" {
 			return tokens.PairToken{}, errors.New("incorrect response from the server")
 		}
+
 		return resp, nil
 	})
+
 	if err != nil {
 		if errors.Is(err, gobreaker.ErrOpenState) {
 			return tokens.PairToken{}, status.Errorf(codes.Unavailable, "service is temporarily unavailable")
 		}
+
 		return tokens.PairToken{}, err
 	}
 

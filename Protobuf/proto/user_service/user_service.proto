@@ -9,7 +9,7 @@ import "validate/validate.proto";
 option go_package = "github.com/DencCPU/gRPCServices/Protobuf/gen/user_service";
 
 service UserService {
-  rpc RegistrationUser(RegistrationUserReq) returns (RegistrationUserResp);
+  rpc RegistrationNewUser(RegistrationUserReq) returns (RegistrationUserResp);
   rpc UpdateTokens(UpdateTokensReq) returns (UpdateTokensResp);
   rpc ValidationTokens(ValidationReq) returns (ValidationResp);
   rpc Authentication(AuthReq) returns (AuthResp);
@@ -19,7 +19,6 @@ message RegistrationUserReq {
   string name = 1 [(validate.rules).string.min_len = 2];
   string email = 2 [(validate.rules).string.email = true];
   string password = 3 [(validate.rules).string.min_len = 8];
-  common.UserRole user_role = 4;
 }
 
 message RegistrationUserResp {

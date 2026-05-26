@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -31,23 +32,30 @@ func NewConfigLoader(globalPathToEnv, envFile, configType, pathToLocalEnv, pathT
 }
 
 // Get a new config
-func NewConfig[T any](loader *ConfigLoader) (*T, error) {
+func NewConfig[T any](ctx context.Context, loader *ConfigLoader) (*T, error) {
 
-	pathLocalEnv, err := GetPathToEnv(loader)
-	if err != nil {
-		return nil, err
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+
+	default:
+		pathLocalEnv, err := GetPathToEnv(loader)
+		if err != nil {
+			return nil, err
+		}
+
+		configViper, err := GetConfigViper(pathLocalEnv, loader)
+		if err != nil {
+			return nil, err
+		}
+
+		var cfg T
+		if err := configViper.Unmarshal(&cfg); err != nil {
+			return nil, err
+		}
+		return &cfg, nil
 	}
 
-	configViper, err := GetConfigViper(pathLocalEnv, loader)
-	if err != nil {
-		return nil, err
-	}
-
-	var cfg T
-	if err := configViper.Unmarshal(&cfg); err != nil {
-		return nil, err
-	}
-	return &cfg, nil
 }
 
 // Get path to local env

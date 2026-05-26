@@ -1,12 +1,9 @@
 package gin
 
 import (
-	"fmt"
 	"net/http"
-	"strings"
 
 	userservicedto "github.com/DencCPU/gRPCServices/APIGetway/internal/adapters/dto/user_service"
-	sharederrors "github.com/DencCPU/gRPCServices/Shared/errors"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -30,11 +27,12 @@ func (api *GinAPI) Middleware() gin.HandlerFunc {
 			})
 			return
 		}
+
 		var user userservicedto.Output
 		user, err := api.service.Validation(c.Request.Context(), accessToken)
 		if err != nil {
 
-			if status.Code(err) == codes.Unauthenticated && strings.Contains(status.Convert(err).Message(), sharederrors.ExpiredToken.Error()) {
+			if status.Code(err) == codes.Unauthenticated {
 				pairToken, err := api.service.UpdateTokens(c.Request.Context(), accessToken, refreshToken)
 				if err != nil {
 					c.JSON(http.StatusBadRequest, gin.H{
@@ -58,7 +56,7 @@ func (api *GinAPI) Middleware() gin.HandlerFunc {
 
 			}
 		}
-		fmt.Println(user)
+
 		c.Set("x-user-id", user.User_id)
 		c.Set("x-user-role", user.Role)
 		c.Next()

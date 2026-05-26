@@ -130,14 +130,16 @@ func (p *PostgresDB) AddOrderID(tx pgx.Tx, ctx context.Context, newOrder orderdo
 	//Check market cache
 	for _, m := range p.marketCache {
 		p.marketMu.RLock()
-
+		fmt.Println("CacheMarketID:", m.MarketId)
+		fmt.Println("UserAccess:", m.UserAccess)
+		fmt.Println("newOrder.UserRole:", newOrder.UserRole)
 		if m.MarketId == newOrder.MarketId && m.UserAccess == newOrder.UserRole {
 			foundMarket = true
 			break
 		}
-
 		p.marketMu.RUnlock()
 	}
+
 	if foundMarket != true {
 		return 0, "", ordererrors.Avalible_markets
 	}

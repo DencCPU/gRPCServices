@@ -37,6 +37,11 @@ func (s *StatusStorage) UpdateStatusSubs(ctx context.Context, key orderdomain.Ke
 						default:
 						}
 					}
+
+					if status == orderdomain.StatusComplited {
+						return
+					}
+
 					laststatus = status
 				}
 			}
@@ -46,5 +51,8 @@ func (s *StatusStorage) UpdateStatusSubs(ctx context.Context, key orderdomain.Ke
 
 	go func() {
 		wg.Wait()
+		for _, ch := range s.Subs[key] {
+			close(ch)
+		}
 	}()
 }

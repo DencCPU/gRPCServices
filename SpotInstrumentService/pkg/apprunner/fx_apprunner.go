@@ -60,7 +60,6 @@ func StorageModul() fx.Option {
 	return fx.Options(
 		fx.Provide(
 			func(logger *zap.Logger) (*memory.Storage, error) {
-
 				storage, err := memory.NewStorage(logger)
 				if err != nil {
 					return nil, err
@@ -73,26 +72,52 @@ func StorageModul() fx.Option {
 				marketsPath := "./SpotInstrumentService/config/market/markets.txt"
 				lc.Append(fx.Hook{
 					OnStart: func(ctx context.Context) error {
-						err := storage.AddMarkets(marketsPath)
-						if err != nil {
-							return err
-						}
-						return nil
+						return storage.AddMarkets(marketsPath)
 					},
 				})
 			},
 		),
 		fx.Invoke(
 			func(lc fx.Lifecycle, logger *zap.Logger, storage *memory.Storage, cfg *spotconfig.Config) {
+				var wg sync.WaitGroup
+				var cancel context.CancelFunc
+
 				lc.Append(fx.Hook{
 					OnStart: func(ctx context.Context) error {
-						go func() {
+						logger.Info("Starting control markets...")
 
-							ctx, cancel := context.WithTimeout(context.Background(), cfg.Storage.Timeout)
-							defer cancel()
-							msg := storage.AccessControl(ctx)
+						ctxCtrl, ctrlCancel := context.WithCancel(context.Background())
+						cancel = ctrlCancel
+						wg.Add(1)
+						go func() {
+							defer wg.Done()
+							msg := storage.AccessControl(ctxCtrl, cfg.Storage.Timeout)
 							logger.Info(msg)
 						}()
+
+						return nil
+					},
+
+					OnStop: func(ctx context.Context) error {
+						logger.Info("Shutting down control markets...")
+
+						if cancel != nil {
+							cancel()
+						}
+
+						done := make(chan struct{})
+						go func() {
+							wg.Wait()
+							close(done)
+						}()
+
+						select {
+						case <-done:
+							logger.Info("Control markets stopped successfully")
+						case <-ctx.Done():
+							logger.Warn("Control markets stop timeout")
+						}
+
 						return nil
 					},
 				})

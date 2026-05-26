@@ -24,7 +24,7 @@ func NewServer(cfg userconfig.Server, logger *zap.Logger) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	limiter := rate.NewLimiter(rate.Limit(cfg.RequestPerSecondLimit), 1)
+	limiter := rate.NewLimiter(rate.Limit(cfg.RequestPerSecondLimit), 5)
 	//Interceptors
 	newServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
@@ -32,9 +32,7 @@ func NewServer(cfg userconfig.Server, logger *zap.Logger) (*Server, error) {
 			interceptors.UnaryPanicRecoveryInterceptor(logger),
 			interceptors.XRequestID,
 			interceptors.LoggerInterseptor(logger),
-		),
-		grpc.StatsHandler(otelgrpc.NewServerHandler()),
-	)
+		), grpc.StatsHandler(otelgrpc.NewServerHandler()))
 
 	return &Server{newServer, lis}, nil
 }

@@ -19,7 +19,7 @@ type JWT struct {
 func NewJWT(cfg userconfig.JWT) *JWT {
 	secret := cfg.Secret
 	ttl := cfg.TTL
-	return &JWT{secret: []byte(secret), AccessTokenTTL: time.Minute * time.Duration(ttl)}
+	return &JWT{secret: []byte(secret), AccessTokenTTL: ttl}
 }
 
 // Create a new JWT

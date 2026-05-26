@@ -19,7 +19,7 @@ func (h *Handlers) StreamOrderUpdate(req *order.StreamOrderUpdateReq, stream ord
 		OrderId: req.OrderId,
 		UserId:  req.UserId,
 	}
-	stateCh, err := h.Service.StreamGetState(stream.Context(), key)
+	stateCh, err := h.service.StreamGetState(stream.Context(), key)
 	if err != nil {
 		return err
 	}
@@ -35,6 +35,7 @@ func (h *Handlers) StreamOrderUpdate(req *order.StreamOrderUpdateReq, stream ord
 			stream.Send(&order.StreamOrderUpdateResp{OrderStatus: status, UpdateStatusTime: update_time})
 
 		case <-stream.Context().Done():
+			h.service.Unsubscribe(key, stateCh)
 			return nil
 		}
 	}

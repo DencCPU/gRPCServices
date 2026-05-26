@@ -43,7 +43,6 @@ func (s *Storage) AddMarkets(path string) error {
 		}
 
 		s.date[i] = &domainmarket.Market{ID: id, Name: name, Enable: true, DeleteAt: nil, UserAccess: userAccess}
-		fmt.Println("Added userRole:", s.date[i])
 	}
 
 	return nil

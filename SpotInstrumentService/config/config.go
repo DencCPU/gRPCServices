@@ -31,7 +31,7 @@ type Server struct {
 }
 
 type Storage struct {
-	Timeout time.Duration `mapstructure:"work_time"`
+	Timeout time.Duration `mapstructure:"timeout"`
 }
 
 type OtelCollector struct {

@@ -2,6 +2,8 @@ package inboxdomain
 
 import (
 	"time"
+
+	orderdomain "github.com/DencCPU/gRPCServices/OrderService/internal/domain/order"
 )
 
 type MarketEvent struct {
@@ -16,9 +18,9 @@ type BasedEvent struct {
 }
 
 type Market struct {
-	MarketId   string `json:"market_id"`
-	MarketName string `json:"market_name"`
-	// UserAccess orderdomain.UserRole `json:"user_access"`
+	MarketId   string               `json:"market_id"`
+	MarketName string               `json:"market_name"`
+	UserAccess orderdomain.UserRole `json:"user_access"`
 }
 
 type KafkaMessage struct {

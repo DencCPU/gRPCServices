@@ -37,20 +37,24 @@ func NewKafkaBroker(cfg spotconfig.Kafka) *KafkaBroker {
 }
 
 func (k *KafkaBroker) Send(ctx context.Context, event *outboxdomain.MarketEvent) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		key := []byte(event.BasedEvent.EventId)
+		value, err := json.Marshal(event)
+		if err != nil {
+			return err
+		}
 
-	key := []byte(event.BasedEvent.EventId)
-	value, err := json.Marshal(event)
-	if err != nil {
-		return err
-	}
-
-	message := kafka.Message{
-		Key:   key,
-		Value: value,
-	}
-	err = k.writer.WriteMessages(ctx, message)
-	if err != nil {
-		return err
+		message := kafka.Message{
+			Key:   key,
+			Value: value,
+		}
+		err = k.writer.WriteMessages(ctx, message)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -62,7 +66,6 @@ func (k *KafkaBroker) CreateTopic(addr string) error {
 	}
 	defer conn.Close()
 
-	// Для одного брокера в KRaft режиме можно просто создать топик через текущее соединение
 	err = conn.CreateTopics(kafka.TopicConfig{
 		Topic:             k.writer.Topic,
 		NumPartitions:     3,

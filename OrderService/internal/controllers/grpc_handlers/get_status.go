@@ -20,7 +20,7 @@ func (h *Handlers) GetOrderStatus(ctx context.Context, req *order.GetOrderReq) (
 		OrderId: req.OrderId,
 		UserId:  req.UserId,
 	}
-	orderInfo, err := h.Service.GetStatus(ctx, key)
+	orderInfo, err := h.service.GetStatus(ctx, key)
 	if err != nil {
 		return &order.GetOrderResp{}, err
 	}

@@ -8,7 +8,7 @@ func (s *StatusStorage) GetStatus(key orderdomain.Key) string {
 	status := s.Status[key]
 	s.mu.RUnlock()
 	if status == "" {
-		return "created"
+		return orderdomain.StatusCreated
 	}
 	return status
 }

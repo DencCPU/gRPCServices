@@ -25,6 +25,7 @@ type MarketsService interface {
 
 type Notify interface {
 	AddNewState(string, string, chan string)
+	Unsubscribe(key orderdomain.Key, ch chan string)
 	GetStatus(orderdomain.Key) string
 	AddNewSub(orderdomain.Key) chan string
 	GetNumbersSubsChan(orderdomain.Key) int

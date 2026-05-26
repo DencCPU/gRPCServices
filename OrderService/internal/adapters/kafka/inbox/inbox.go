@@ -18,6 +18,7 @@ func NewInbox() *Inbox {
 
 func (i *Inbox) Add(msg inboxdomain.KafkaMessage) []orderdomain.Market {
 	key := msg.Value.BasedEvent.EventId
+
 	i.mu.Lock()
 	i.cacheEvent[key] = msg.Value
 	eventMarkets := i.cacheEvent[key].Markets
@@ -29,7 +30,7 @@ func (i *Inbox) Add(msg inboxdomain.KafkaMessage) []orderdomain.Market {
 		m := orderdomain.Market{
 			MarketId:   market.MarketId,
 			MarketName: market.MarketName,
-			// UserAccess: market.UserAccess,
+			UserAccess: market.UserAccess,
 		}
 		markets = append(markets, m)
 	}

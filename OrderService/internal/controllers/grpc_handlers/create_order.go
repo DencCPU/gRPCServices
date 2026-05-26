@@ -30,7 +30,7 @@ func (h *Handlers) CreateOrder(ctx context.Context, req *order.CreateOrderReq) (
 	if newOrder.OrderType == orderdomain.ORDER_TYPE_UNSPECIFIED {
 		return nil, fmt.Errorf("unknow order type")
 	}
-	orderID, status, err := h.Service.CreateOrder(ctx, newOrder)
+	orderID, status, err := h.service.CreateOrder(ctx, newOrder)
 	if err != nil {
 		return &order.CreateOrderResp{}, err
 	}

@@ -11,7 +11,7 @@ func init() {
 }
 
 // Управление работой рынков
-func (s *Storage) AccessControl(ctx context.Context) string {
+func (s *Storage) AccessControl(ctx context.Context, timeout time.Duration) string {
 
 	//Добавление названия рынков в слайс
 	var markets = make([]int, 0, len(s.date))
@@ -19,16 +19,20 @@ func (s *Storage) AccessControl(ctx context.Context) string {
 		markets = append(markets, key)
 	}
 
+	ticker := time.NewTicker(timeout)
+	defer ticker.Stop()
+
 	for {
 		select {
 		case <-ctx.Done():
-			// fmt.Println("Время жизни цикла истекло")
 			return "Market management has been completed"
-		default:
-			d := rand.Intn(3) //Случайная блокировка или удаление рынка
+
+		case <-ticker.C:
+
+			d := rand.Intn(3)
 			switch d {
 
-			case 0: //Блокировка доступа случайного маркета
+			case 0: //Market lock
 
 				n := rand.Intn(len(markets))
 
@@ -37,21 +41,21 @@ func (s *Storage) AccessControl(ctx context.Context) string {
 				if s.date[key].Enable != false {
 					s.date[key].Enable = false
 					s.mu.Unlock()
-					break
+					continue
 				}
 				s.mu.Unlock()
 
-			case 1: //Удаление случайного маркета с рынка
+			case 1: //Delete market
 				n := rand.Intn(len(markets))
-
 				s.mu.Lock()
 				key := markets[n]
 				if s.date[key].Enable != false {
 					s.date[key].Enable = false
 					delete_at := time.Now().Local()
 					s.date[key].DeleteAt = &delete_at
+
 					s.mu.Unlock()
-					break
+					continue
 				}
 				s.mu.Unlock()
 
@@ -64,13 +68,13 @@ func (s *Storage) AccessControl(ctx context.Context) string {
 				if s.date[key].Enable == false {
 					s.date[key].Enable = true
 					s.date[key].DeleteAt = nil
+
 					s.mu.Unlock()
-					break
+					continue
 				}
 				s.mu.Unlock()
 
 			}
 		}
-		time.Sleep(1 * time.Second)
 	}
 }

@@ -27,8 +27,7 @@ func (s *SpotService) SendToBroker(ctx context.Context, wg *sync.WaitGroup, getM
 			case <-ticker.C:
 				markets := s.storage.GetAllMarkets()
 				if len(markets) > 0 {
-					info := s.outbox.Add(markets)
-					s.logger.Info(info)
+					s.outbox.Add(markets)
 				}
 			}
 		}
@@ -53,6 +52,7 @@ func (s *SpotService) SendToBroker(ctx context.Context, wg *sync.WaitGroup, getM
 
 				for _, event := range pendingEvents {
 					err := s.kafka.Send(ctx, event)
+
 					if err != nil {
 						errChan <- fmt.Errorf("send message error:%w", err)
 						s.logger.Error("failed to send event to Kafka",
@@ -60,9 +60,11 @@ func (s *SpotService) SendToBroker(ctx context.Context, wg *sync.WaitGroup, getM
 							zap.Error(err))
 						continue
 					}
+
 					s.logger.Info("the massege sent to kafka:",
 						zap.String("eventID:", event.BasedEvent.EventId),
 					)
+
 					err = s.outbox.Remove(event.BasedEvent.EventId)
 					if err != nil {
 						errChan <- err

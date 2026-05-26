@@ -12,13 +12,14 @@ type Service interface {
 	CreateOrder(ctx context.Context, newOrder orderdomain.Order) (orderID string, orderStatus string, err error)
 	GetStatus(ctx context.Context, key orderdomain.Key) (orderInfo orderdomain.ReceivedOrderInfo, err error)
 	StreamGetState(ctx context.Context, key orderdomain.Key) (stateChan chan string, err error)
+	Unsubscribe(key orderdomain.Key, ch chan string)
 }
 
 type Handlers struct {
 	order.UnimplementedOrderServiceServer
-	Service Service
+	service Service
 }
 
 func NewHandlers(orderService *usecase.OrderService) *Handlers {
-	return &Handlers{Service: orderService}
+	return &Handlers{service: orderService}
 }

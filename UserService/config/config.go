@@ -26,8 +26,8 @@ type Postgres struct {
 }
 
 type JWT struct {
-	Secret string `mapstructure:"secret"`
-	TTL    int    `mapstructure:"ttl"`
+	Secret string        `mapstructure:"secret"`
+	TTL    time.Duration `mapstructure:"ttl"`
 }
 
 type OtelCollector struct {

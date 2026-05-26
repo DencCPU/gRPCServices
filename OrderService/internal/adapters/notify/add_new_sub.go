@@ -9,18 +9,18 @@ func (s *StatusStorage) AddNewSub(key orderdomain.Key) chan string {
 	s.Subs[key] = append(s.Subs[key], ch)
 	s.mu.Unlock()
 
-	// unsubscribe := func() {
-	// 	s.mu.Lock()
-	// 	defer s.mu.Unlock()
-	// 	subs := s.Subs[key]
-	// 	for i, c := range subs {
-	// 		if c == ch {
-	// 			s.Subs[key] = append(subs[:i], subs[i+1:]...)
-	// 			break
-	// 		}
-	// 	}
-	// 	close(ch)
-	// }
-
 	return ch
+}
+
+func (s *StatusStorage) Unsubscribe(key orderdomain.Key, ch chan string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	subs := s.Subs[key]
+	for i, c := range subs {
+		if c == ch {
+			s.Subs[key] = append(subs[:i], subs[i+1:]...)
+			break
+		}
+	}
+	close(ch)
 }

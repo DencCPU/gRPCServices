@@ -120,36 +120,30 @@ services:
     ports:
       - "9092:9092"
       - "29092:29092"
+      
     environment:
-    # KRaft обязательные настройки
+    # KRaft 
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: controller,broker
       KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
     
-    # Listener'ы (добавляем PLAINTEXT_HOST)
+    # Listeners
       KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093"
       KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
       KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
     
-    # Авто-создание топиков
+    # Автоматическое создание топиков
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
     
-    # Настройки по умолчанию
+    
       KAFKA_NUM_PARTITIONS: 3
       KAFKA_DEFAULT_REPLICATION_FACTOR: 1
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
     
-    # Хранение данных
-      KAFKA_LOG_RETENTION_HOURS: 168
-      KAFKA_LOG_SEGMENT_BYTES: 1073741824
-      KAFKA_LOG_DIRS: /var/lib/kafka/data
-    
-    # Уникальный ID кластера
-      CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
     networks:
       - kafka-net
     restart: unless-stopped
@@ -161,7 +155,7 @@ services:
       timeout: 10s
       retries: 5
 
-  # Kafka UI - веб-интерфейс
+  # Kafka UI
   kafka-ui:
     image: docker.redpanda.com/redpandadata/console:latest
     container_name: kafka-ui

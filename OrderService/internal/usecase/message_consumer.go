@@ -32,7 +32,7 @@ func (o *OrderService) MessageConsumer(ctx context.Context, wg *sync.WaitGroup) 
 
 					if o.inbox.CheckEvent(msg.Value.BasedEvent.EventId) {
 						o.logger.Debug("duplicate message skipped",
-							zap.String("event_id", msg.Value.BasedEvent.EventId))
+							zap.String("eventID", msg.Value.BasedEvent.EventId))
 
 						err := o.kafka.Commit(ctx, msg)
 						if err != nil {
@@ -43,7 +43,7 @@ func (o *OrderService) MessageConsumer(ctx context.Context, wg *sync.WaitGroup) 
 
 					newMarkets := o.inbox.Add(msg)
 					o.logger.Info("processing markets update",
-						zap.String("event_id", msg.Value.BasedEvent.EventId),
+						zap.String("eventID", msg.Value.BasedEvent.EventId),
 						zap.Int("new_markets_count", len(newMarkets)))
 
 					o.storage.UpdateMarketCache(newMarkets)
@@ -57,7 +57,7 @@ func (o *OrderService) MessageConsumer(ctx context.Context, wg *sync.WaitGroup) 
 					}
 
 					o.logger.Info("markets update processed successfully",
-						zap.String("event_id", msg.Value.BasedEvent.EventId))
+						zap.String("eventID", msg.Value.BasedEvent.EventId))
 
 				}
 			}

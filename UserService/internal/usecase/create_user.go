@@ -36,7 +36,7 @@ func (s *Service) CreateUser(ctx context.Context, user domainuser.User) (tokensd
 		return tokensdto.PairToken{}, errors.New("this user is already registered")
 	}
 
-	user_id, refreshToken, err := s.storage.AddUser(ctx, user)
+	userId, refreshToken, err := s.storage.AddUser(ctx, user)
 	if err != nil {
 		s.logger.Error("error adding user to database:",
 			zap.String("spanID:", span.SpanContext().SpanID().String()),
@@ -53,7 +53,7 @@ func (s *Service) CreateUser(ctx context.Context, user domainuser.User) (tokensd
 
 	//Create accses token
 	span.AddEvent("create accsess token")
-	accsesToken, ttl, err := s.jwt.CreateAccessToken(user_id, user.Email, user.Role)
+	accsesToken, ttl, err := s.jwt.CreateAccessToken(userId, user.Email, user.Role)
 	if err != nil {
 		s.logger.Error("jwt generation error:",
 			zap.Error(err),

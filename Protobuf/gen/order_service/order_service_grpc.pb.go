@@ -27,11 +27,34 @@ const (
 // OrderServiceClient is the client API for OrderService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-//
-// Сервис управления заказами
 type OrderServiceClient interface {
+	// The GetOrderStatus method retrieves information about a user's order.
+	// The request body contains the order number (order_id) and user number (user_id).
+	// The method returns a response with the following fields:
+	// -order_status,
+	// -order_id,
+	// -order coas(price),
+	// -number of order units (quantity),
+	// -the title of the market in which the order was made( market_name).
 	GetOrderStatus(ctx context.Context, in *GetOrderReq, opts ...grpc.CallOption) (*GetOrderResp, error)
+	// The CreateOrder method is responsible for creating an order by the user.
+	// The request body contains information about:
+	// -user_id,
+	// -market_id,
+	// -order_type,
+	// -order coas(price),
+	// -number of order units (quantity),
+	// -user_role,
+	// -idempotency key to prevent duplicate orders.
+	// The method returns a response with the following fields:
+	// -order_id,
+	// -order_status.
 	CreateOrder(ctx context.Context, in *CreateOrderReq, opts ...grpc.CallOption) (*CreateOrderResp, error)
+	// The StreamOrderUpdate method is responsible for receiving up-to-date information about changes in the order status.
+	// The request body contains information about order_id and user_id.
+	// The method returns a response with the following fields:
+	// -order_status,
+	// -update_status_time.
 	StreamOrderUpdate(ctx context.Context, in *StreamOrderUpdateReq, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StreamOrderUpdateResp], error)
 }
 
@@ -85,11 +108,34 @@ type OrderService_StreamOrderUpdateClient = grpc.ServerStreamingClient[StreamOrd
 // OrderServiceServer is the server API for OrderService service.
 // All implementations must embed UnimplementedOrderServiceServer
 // for forward compatibility.
-//
-// Сервис управления заказами
 type OrderServiceServer interface {
+	// The GetOrderStatus method retrieves information about a user's order.
+	// The request body contains the order number (order_id) and user number (user_id).
+	// The method returns a response with the following fields:
+	// -order_status,
+	// -order_id,
+	// -order coas(price),
+	// -number of order units (quantity),
+	// -the title of the market in which the order was made( market_name).
 	GetOrderStatus(context.Context, *GetOrderReq) (*GetOrderResp, error)
+	// The CreateOrder method is responsible for creating an order by the user.
+	// The request body contains information about:
+	// -user_id,
+	// -market_id,
+	// -order_type,
+	// -order coas(price),
+	// -number of order units (quantity),
+	// -user_role,
+	// -idempotency key to prevent duplicate orders.
+	// The method returns a response with the following fields:
+	// -order_id,
+	// -order_status.
 	CreateOrder(context.Context, *CreateOrderReq) (*CreateOrderResp, error)
+	// The StreamOrderUpdate method is responsible for receiving up-to-date information about changes in the order status.
+	// The request body contains information about order_id and user_id.
+	// The method returns a response with the following fields:
+	// -order_status,
+	// -update_status_time.
 	StreamOrderUpdate(*StreamOrderUpdateReq, grpc.ServerStreamingServer[StreamOrderUpdateResp]) error
 	mustEmbedUnimplementedOrderServiceServer()
 }

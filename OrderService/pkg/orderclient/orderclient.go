@@ -25,6 +25,7 @@ func NewClient() (*Client, error) {
 		entryorderservice.PathToLocalEnv,
 		entryorderservice.PathToConfig,
 	)
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	cfg, err := config.NewConfig[orderconfig.Config](ctx, loader)

@@ -8,6 +8,7 @@ import (
 	"github.com/DencCPU/gRPCServices/APIGetway/internal/adapters/dto/tokens"
 	userservicedto "github.com/DencCPU/gRPCServices/APIGetway/internal/adapters/dto/user_service"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"golang.org/x/time/rate"
 
 	orderdomain "github.com/DencCPU/gRPCServices/APIGetway/internal/domain/order"
 	userdomain "github.com/DencCPU/gRPCServices/APIGetway/internal/domain/user"
@@ -29,9 +30,10 @@ type GinAPI struct {
 	r              *gin.Engine
 	service        Service
 	exeptionalPath map[string]bool
+	limiter        *rate.Limiter
 }
 
-func NewGinAPI(service Service) GinAPI {
+func NewGinAPI(requestPerSecondLimit uint, service Service) GinAPI {
 	api := GinAPI{}
 	api.r = gin.Default()
 	api.service = service
@@ -40,15 +42,17 @@ func NewGinAPI(service Service) GinAPI {
 		"/user/reg":  true,
 		"/user/auth": true,
 	}
-	api.r.Use(otelgin.Middleware("API/getway"))
-	api.r.Use(api.Middleware())
 
+	api.limiter = rate.NewLimiter(rate.Limit(requestPerSecondLimit), 5)
 	api.endpoints()
 	return api
 }
 
 func (api *GinAPI) endpoints() {
+	//Middleware
 
+	api.r.Use(otelgin.Middleware("API/getway"))
+	api.r.Use(api.Middleware())
 	//OrderSevice
 	api.r.POST("/order", api.CreateOrderHandler)             //Create order
 	api.r.GET("/order/status", api.GetOrderStatus)           //Get status order

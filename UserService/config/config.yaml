@@ -14,7 +14,7 @@ postgres:
 
 jwt:
   secret:
-  ttl: 2m
+  ttl: 60m
 
 collector:
   host:

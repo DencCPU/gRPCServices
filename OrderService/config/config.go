@@ -12,10 +12,11 @@ type Config struct {
 }
 
 type Server struct {
-	Port                  int    `mapstructure:"port"`
-	Host                  string `mapstructure:"host"`
-	Network               string `mapstructure:"network"`
-	RequestPerSecondLimit uint   `mapstructure:"request_per_second_limit"`
+	Port                    int           `mapstructure:"port"`
+	Host                    string        `mapstructure:"host"`
+	Network                 string        `mapstructure:"network"`
+	RequestPerSecondLimit   uint          `mapstructure:"request_per_second_limit"`
+	ClientConnectionTimeout time.Duration `mapstructure:"client_connection_timeout"`
 }
 
 type Postgres struct {

@@ -26,6 +26,7 @@ import (
 
 	"go.opentelemetry.io/contrib/bridges/otelzap"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/propagation"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -159,7 +160,7 @@ func PostgresModul() fx.Option {
 func BreakerModule() fx.Option {
 	return fx.Options(
 		fx.Provide(
-			func(cfg *orderconfig.Config, logger *zap.Logger) *gobreaker.CircuitBreaker {
+			func(cfg *orderconfig.Config, logger *zap.Logger, meter metric.Meter) *gobreaker.CircuitBreaker {
 				params := breaker.Params{
 					Name:           cfg.BreakerSetting.Name,
 					MaxRequest:     cfg.BreakerSetting.MaxRequests,
@@ -167,7 +168,13 @@ func BreakerModule() fx.Option {
 					Timeout:        cfg.BreakerSetting.Timeout,
 					MaxFailRequest: cfg.BreakerSetting.MaxFailRequest,
 				}
-				breaker := breaker.NewBreaker(logger, params)
+				breaker, err := breaker.NewBreaker(logger, params, meter)
+				if err != nil {
+					logger.Error("breaker initialization error",
+						zap.Error(err),
+					)
+					return nil
+				}
 				return breaker
 			},
 		),
@@ -179,7 +186,7 @@ func SpotClientModul() fx.Option {
 	return fx.Options(
 		fx.Provide(
 			func(cfg *orderconfig.Config, logger *zap.Logger, breaker *gobreaker.CircuitBreaker) (*spotservice.Client, error) {
-				spotClient, err := spotservice.NewClient(cfg.BreakerSetting, logger, breaker)
+				spotClient, err := spotservice.NewClient(logger, breaker, cfg.Server.ClientConnectionTimeout)
 				if err != nil {
 					logger.Error("error initialization spot service client:",
 						zap.Error(err),
@@ -239,7 +246,7 @@ func JaegerTracerModul() fx.Option {
 func MetricModul() fx.Option {
 	return fx.Options(
 		fx.Provide(
-			func(logger *zap.Logger, cfg *orderconfig.Config) (*sdkmetric.MeterProvider, error) {
+			func(logger *zap.Logger, cfg *orderconfig.Config) (*sdkmetric.MeterProvider, metric.Meter, error) {
 
 				provider, err := opentelemetry.NewMetricProviderGrpc(
 					context.Background(),
@@ -251,9 +258,10 @@ func MetricModul() fx.Option {
 				if err != nil {
 					logger.Error("error initialization metric:",
 						zap.Error(err))
-					return nil, err
+					return nil, nil, err
 				}
-				return provider, err
+
+				return provider, provider.Meter("order/service"), err
 			},
 		),
 		fx.Invoke(
@@ -336,28 +344,13 @@ func ServiceModule() fx.Option {
 		),
 		fx.Invoke(
 			func(lc fx.Lifecycle, logger *zap.Logger, service *usecase.OrderService) {
-				errChan := make(chan error, 10)
 				var wg sync.WaitGroup
-				var cancel context.CancelFunc
 
+				largerCtx, cancel := context.WithCancel(context.Background())
 				lc.Append(fx.Hook{
 					OnStart: func(ctx context.Context) error {
-						largerCtx, c := context.WithCancel(context.Background())
-						cancel = c
 
-						service.MessageConsumer(largerCtx, &wg, errChan)
-
-						wg.Add(1)
-						go func() {
-							defer wg.Done()
-							for err := range errChan {
-								if err != nil && err != context.Canceled {
-									logger.Error("kafka consumer error:",
-										zap.Error(err),
-									)
-								}
-							}
-						}()
+						service.MessageConsumer(largerCtx, &wg)
 						return nil
 					},
 					OnStop: func(ctx context.Context) error {
@@ -369,7 +362,6 @@ func ServiceModule() fx.Option {
 						go func() {
 							wg.Wait()
 							close(done)
-							close(errChan)
 						}()
 
 						select {

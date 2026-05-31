@@ -109,8 +109,8 @@ func (p *PostgresDB) Authentication(ctx context.Context, email, password string)
 func (p *PostgresDB) CheckUser(ctx context.Context, email string) bool {
 	var exist bool
 	err := p.QueryRow(ctx, `
-	SELECT EXIST
-	(SELECT * 
+	SELECT EXISTS
+	(SELECT 1 
 	FROM users 
 	WHERE email = $1)
 	`, email).Scan(&exist)

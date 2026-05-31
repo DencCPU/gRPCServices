@@ -35,6 +35,7 @@ type Notify interface {
 type Kafka interface {
 	ReadMessage(ctx context.Context) (inboxdomain.KafkaMessage, error)
 	Commit(ctx context.Context, msg inboxdomain.KafkaMessage) error
+	Close()
 }
 
 type Inbox interface {

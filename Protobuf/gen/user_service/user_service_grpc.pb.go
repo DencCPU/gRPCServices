@@ -8,6 +8,7 @@ package user_service
 
 import (
 	context "context"
+
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -29,9 +30,40 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
+	// The RegistrationNewUser method is responsible for registering a new user in the system.
+	// The request body contains information about:
+	// -user name (name),
+	// -user email address (email),
+	// -user account password (password).
+	// The method returns a response with the following fields:
+	// -access_token (JWT token for API authentication),
+	// -refresh_token (token for obtaining a new access token),
+	// -expire_at (access token expiration timestamp).
 	RegistrationNewUser(ctx context.Context, in *RegistrationUserReq, opts ...grpc.CallOption) (*RegistrationUserResp, error)
+	// The UpdateTokens method is responsible for refreshing both access and refresh token pair.
+	// The request body contains information about:
+	// -current access_token (access_token),
+	// -current refresh_token (refresh_token).
+	// The method returns a response with the following fields:
+	// -new access_token (access_token),
+	// -new refresh_token (refresh_token),
+	// -new access_token expiration timestamp (expire_at).
 	UpdateTokens(ctx context.Context, in *UpdateTokensReq, opts ...grpc.CallOption) (*UpdateTokensResp, error)
+	// The ValidationTokens method is responsible for validating the access_token.
+	// The request body contains information about:
+	// -access_token (access_token).
+	// The method returns a response with the following fields:
+	// -user_id (user_id),
+	// -user_role (role), extracted from the valid token.
 	ValidationTokens(ctx context.Context, in *ValidationReq, opts ...grpc.CallOption) (*ValidationResp, error)
+	// The Authentication method is responsible for authenticating a user in the system.
+	// The request body contains information about:
+	// -user email address (email),
+	// -user account password (password).
+	// The method returns a response with the following fields:
+	// -access_token (JWT token for API authentication),
+	// -refresh_token (token for obtaining a new access token),
+	// -expire_at (access token expiration timestamp).
 	Authentication(ctx context.Context, in *AuthReq, opts ...grpc.CallOption) (*AuthResp, error)
 }
 
@@ -87,9 +119,40 @@ func (c *userServiceClient) Authentication(ctx context.Context, in *AuthReq, opt
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
 type UserServiceServer interface {
+	// The RegistrationNewUser method is responsible for registering a new user in the system.
+	// The request body contains information about:
+	// -user name (name),
+	// -user email address (email),
+	// -user account password (password).
+	// The method returns a response with the following fields:
+	// -access_token (JWT token for API authentication),
+	// -refresh_token (token for obtaining a new access token),
+	// -expire_at (access token expiration timestamp).
 	RegistrationNewUser(context.Context, *RegistrationUserReq) (*RegistrationUserResp, error)
+	// The UpdateTokens method is responsible for refreshing both access and refresh token pair.
+	// The request body contains information about:
+	// -current access_token (access_token),
+	// -current refresh_token (refresh_token).
+	// The method returns a response with the following fields:
+	// -new access_token (access_token),
+	// -new refresh_token (refresh_token),
+	// -new access_token expiration timestamp (expire_at).
 	UpdateTokens(context.Context, *UpdateTokensReq) (*UpdateTokensResp, error)
+	// The ValidationTokens method is responsible for validating the access_token.
+	// The request body contains information about:
+	// -access_token (access_token).
+	// The method returns a response with the following fields:
+	// -user_id (user_id),
+	// -user_role (role), extracted from the valid token.
 	ValidationTokens(context.Context, *ValidationReq) (*ValidationResp, error)
+	// The Authentication method is responsible for authenticating a user in the system.
+	// The request body contains information about:
+	// -user email address (email),
+	// -user account password (password).
+	// The method returns a response with the following fields:
+	// -access_token (JWT token for API authentication),
+	// -refresh_token (token for obtaining a new access token),
+	// -expire_at (access token expiration timestamp).
 	Authentication(context.Context, *AuthReq) (*AuthResp, error)
 	mustEmbedUnimplementedUserServiceServer()
 }

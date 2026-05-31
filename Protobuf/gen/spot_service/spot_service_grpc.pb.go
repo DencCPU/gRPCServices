@@ -25,9 +25,19 @@ const (
 // SpotInstrumentServiceClient is the client API for SpotInstrumentService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-//
-// Предоставления данных о рынках
 type SpotInstrumentServiceClient interface {
+	// The ViewMarket is designed to obtain a list of available markets for a specific user.
+	// The request body contains information about:
+	// -user_roles,
+	// -user_id,
+	// -page_size,
+	// -page_token.
+	// The page_size field is responsible for the number of elements on one page.
+	// The method returns a response with the following fields:
+	// -list of available markets (enable_markets),
+	// -next_page_token.
+	// next_page_token is a token that marks the last market in the resulting list.
+	// When regenerating, market browsing will begin with the market corresponding to this token.
 	ViewMarket(ctx context.Context, in *ViewMarketReq, opts ...grpc.CallOption) (*ViewMarketResp, error)
 }
 
@@ -52,9 +62,19 @@ func (c *spotInstrumentServiceClient) ViewMarket(ctx context.Context, in *ViewMa
 // SpotInstrumentServiceServer is the server API for SpotInstrumentService service.
 // All implementations must embed UnimplementedSpotInstrumentServiceServer
 // for forward compatibility.
-//
-// Предоставления данных о рынках
 type SpotInstrumentServiceServer interface {
+	// The ViewMarket is designed to obtain a list of available markets for a specific user.
+	// The request body contains information about:
+	// -user_roles,
+	// -user_id,
+	// -page_size,
+	// -page_token.
+	// The page_size field is responsible for the number of elements on one page.
+	// The method returns a response with the following fields:
+	// -list of available markets (enable_markets),
+	// -next_page_token.
+	// next_page_token is a token that marks the last market in the resulting list.
+	// When regenerating, market browsing will begin with the market corresponding to this token.
 	ViewMarket(context.Context, *ViewMarketReq) (*ViewMarketResp, error)
 	mustEmbedUnimplementedSpotInstrumentServiceServer()
 }

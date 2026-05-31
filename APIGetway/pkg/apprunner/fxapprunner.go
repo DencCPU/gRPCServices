@@ -20,6 +20,7 @@ import (
 	"github.com/DencCPU/gRPCServices/Shared/opentelemetry"
 	"github.com/sony/gobreaker"
 	"go.opentelemetry.io/contrib/bridges/otelzap"
+	"go.opentelemetry.io/otel/metric"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
@@ -85,7 +86,7 @@ func ConfigModul() fx.Option {
 func BreakerModule() fx.Option {
 	return fx.Options(
 		fx.Provide(
-			func(cfg *apiconfig.Config, logger *zap.Logger) *gobreaker.CircuitBreaker {
+			func(cfg *apiconfig.Config, logger *zap.Logger, meter metric.Meter) *gobreaker.CircuitBreaker {
 				params := breaker.Params{
 					Name:           cfg.BreakerSetting.Name,
 					MaxRequest:     cfg.BreakerSetting.MaxRequests,
@@ -93,7 +94,13 @@ func BreakerModule() fx.Option {
 					Timeout:        cfg.BreakerSetting.Timeout,
 					MaxFailRequest: cfg.BreakerSetting.MaxFailRequest,
 				}
-				breaker := breaker.NewBreaker(logger, params)
+				breaker, err := breaker.NewBreaker(logger, params, meter)
+				if err != nil {
+					logger.Error("breaker initialization error",
+						zap.Error(err),
+					)
+					return nil
+				}
 				return breaker
 			},
 		),
@@ -104,8 +111,8 @@ func BreakerModule() fx.Option {
 func SpotClientModul() fx.Option {
 	return fx.Options(
 		fx.Provide(
-			func(logger *zap.Logger, breaker *gobreaker.CircuitBreaker) (*spotclient.Client, error) {
-				spotClient, err := spotclient.NewClient(breaker)
+			func(logger *zap.Logger, breaker *gobreaker.CircuitBreaker, cfg *apiconfig.Config) (*spotclient.Client, error) {
+				spotClient, err := spotclient.NewClient(breaker, cfg.Server.ClientConnectionTimeout)
 				if err != nil {
 					logger.Error("error initialization spot service client:",
 						zap.Error(err),
@@ -122,8 +129,8 @@ func SpotClientModul() fx.Option {
 func OrderClientModul() fx.Option {
 	return fx.Options(
 		fx.Provide(
-			func(logger *zap.Logger, breaker *gobreaker.CircuitBreaker) (*orderclient.Client, error) {
-				orderClient, err := orderclient.NewClient(breaker)
+			func(logger *zap.Logger, breaker *gobreaker.CircuitBreaker, cfg *apiconfig.Config) (*orderclient.Client, error) {
+				orderClient, err := orderclient.NewClient(breaker, cfg.Server.ClientConnectionTimeout)
 				if err != nil {
 					logger.Error("error initialization order service client:",
 						zap.Error(err),
@@ -141,7 +148,7 @@ func UserClientModule() fx.Option {
 	return fx.Options(
 		fx.Provide(
 			func(cfg *apiconfig.Config, logger *zap.Logger, breaker *gobreaker.CircuitBreaker) (*userclient.Client, error) {
-				userClient, err := userclient.NewClient(breaker)
+				userClient, err := userclient.NewClient(breaker, cfg.Server.ClientConnectionTimeout)
 				if err != nil {
 					logger.Error("error initialization user service client:",
 						zap.Error(err),
@@ -198,7 +205,7 @@ func TracerModule() fx.Option {
 func MetricModul() fx.Option {
 	return fx.Options(
 		fx.Provide(
-			func(logger *zap.Logger, cfg *apiconfig.Config) (*sdkmetric.MeterProvider, error) {
+			func(logger *zap.Logger, cfg *apiconfig.Config) (*sdkmetric.MeterProvider, metric.Meter, error) {
 
 				provider, err := opentelemetry.NewMetricProviderHttp(
 					context.Background(),
@@ -210,9 +217,9 @@ func MetricModul() fx.Option {
 				if err != nil {
 					logger.Error("error initialization metric:",
 						zap.Error(err))
-					return nil, err
+					return nil, nil, err
 				}
-				return provider, err
+				return provider, provider.Meter("api/getway"), err
 			},
 		),
 		fx.Invoke(
@@ -286,8 +293,8 @@ func ServiceModule() fx.Option {
 func HandlersModule() fx.Option {
 	return fx.Options(
 		fx.Provide(
-			func(service *usecase.Service) gin.GinAPI {
-				return gin.NewGinAPI(service)
+			func(service *usecase.Service, cfg *apiconfig.Config) gin.GinAPI {
+				return gin.NewGinAPI(cfg.Server.RequestPerSecondLimit, service)
 			},
 		),
 	)
@@ -301,8 +308,9 @@ func ServerModule() fx.Option {
 				host := cfg.Server.Host
 				port := strconv.Itoa(cfg.Server.Port)
 				srv := &http.Server{
-					Addr:    host + ":" + port,
-					Handler: api.Router(),
+					Addr:         host + ":" + port,
+					Handler:      api.Router(),
+					WriteTimeout: cfg.Server.WriteTimeout,
 				}
 				lc.Append(fx.Hook{
 					OnStart: func(ctx context.Context) error {

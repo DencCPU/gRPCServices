@@ -1,6 +1,9 @@
 server:
   port: 
-  host: 
+  host:
+  write_timeout: 10s
+  client_connection_timeout: 5s
+  request_per_second_limit: 100 
 
 breakersetting:
   name: "APIGetway"

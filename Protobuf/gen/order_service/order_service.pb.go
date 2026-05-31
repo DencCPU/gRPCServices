@@ -74,7 +74,7 @@ func (OrderType) EnumDescriptor() ([]byte, []int) {
 	return file_order_service_order_service_proto_rawDescGZIP(), []int{0}
 }
 
-// Запрос для GetOrderStatus
+// Request for GetOrderStatus
 type GetOrderReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
@@ -127,7 +127,7 @@ func (x *GetOrderReq) GetUserId() string {
 	return ""
 }
 
-// Ответ для GetOrderStatus
+// Response for GetOrderStatus
 type GetOrderResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	OrderStatus   string                 `protobuf:"bytes,1,opt,name=order_status,json=orderStatus,proto3" json:"order_status,omitempty"`
@@ -204,7 +204,7 @@ func (x *GetOrderResp) GetMarketName() string {
 	return ""
 }
 
-// Запрос для CreateOrder
+// Request for CreateOrder
 type CreateOrderReq struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	UserId          string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -297,7 +297,7 @@ func (x *CreateOrderReq) GetIndempotencyKey() string {
 	return ""
 }
 
-// Ответ для CreateOrder
+// Response for CreateOrder
 type CreateOrderResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
@@ -350,6 +350,7 @@ func (x *CreateOrderResp) GetOrderStatus() string {
 	return ""
 }
 
+// Request for StreamOrderUpdate
 type StreamOrderUpdateReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
@@ -402,6 +403,7 @@ func (x *StreamOrderUpdateReq) GetUserId() string {
 	return ""
 }
 
+// Response for StreamOrderUpdate
 type StreamOrderUpdateResp struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
 	OrderStatus      string                 `protobuf:"bytes,1,opt,name=order_status,json=orderStatus,proto3" json:"order_status,omitempty"`

@@ -15,13 +15,15 @@ import (
 
 func (c *Client) RegistrationUser(ctx context.Context, newUser userdomain.User) (tokens.PairToken, error) {
 	result, err := c.breaker.Execute(func() (interface{}, error) {
+		childCtx, cancel := context.WithTimeout(ctx, c.ConnectionTimeout)
+		defer cancel()
 		req := &user_service.RegistrationUserReq{
 			Name:     newUser.Name,
 			Email:    newUser.Email,
 			Password: newUser.Password,
 		}
 
-		resp, err := c.RegistrationNewUser(ctx, req)
+		resp, err := c.RegistrationNewUser(childCtx, req)
 		if err != nil {
 			return tokens.PairToken{}, err
 		}

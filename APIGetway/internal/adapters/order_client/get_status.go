@@ -15,11 +15,13 @@ import (
 
 func (c *Client) GetStatus(ctx context.Context, input orderdto.GetInput) (orderdto.GetOutput, error) {
 	result, err := c.breaker.Execute(func() (interface{}, error) {
+		childCtx, cancel := context.WithTimeout(ctx, c.ConnectionTimeout)
+		defer cancel()
 		req := order_service.GetOrderReq{
 			OrderId: input.OrderId,
 			UserId:  input.UserId,
 		}
-		resp, err := c.GetOrderStatus(ctx, &req)
+		resp, err := c.GetOrderStatus(childCtx, &req)
 		if err != nil {
 			return orderdto.GetOutput{}, err
 		}

@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (s *SpotService) SendToBroker(ctx context.Context, wg *sync.WaitGroup, getMarketsInterval time.Duration, relayInterval time.Duration, errChan chan error) {
+func (s *SpotService) SendToBroker(ctx context.Context, wg *sync.WaitGroup, getMarketsInterval time.Duration, relayInterval time.Duration) {
 
 	wg.Add(1)
 	go func() {
@@ -22,7 +22,6 @@ func (s *SpotService) SendToBroker(ctx context.Context, wg *sync.WaitGroup, getM
 		for {
 			select {
 			case <-ctx.Done():
-				errChan <- ctx.Err()
 				return
 			case <-ticker.C:
 				markets := s.storage.GetAllMarkets()
@@ -49,12 +48,16 @@ func (s *SpotService) SendToBroker(ctx context.Context, wg *sync.WaitGroup, getM
 				if len(pendingEvents) == 0 {
 					continue
 				}
+				for _, el := range pendingEvents {
+					markets := el.Markets
+					fmt.Println(markets)
+				}
 
 				for _, event := range pendingEvents {
+
 					err := s.kafka.Send(ctx, event)
 
 					if err != nil {
-						errChan <- fmt.Errorf("send message error:%w", err)
 						s.logger.Error("failed to send event to Kafka",
 							zap.String("event_id", event.BasedEvent.EventId),
 							zap.Error(err))
@@ -67,7 +70,6 @@ func (s *SpotService) SendToBroker(ctx context.Context, wg *sync.WaitGroup, getM
 
 					err = s.outbox.Remove(event.BasedEvent.EventId)
 					if err != nil {
-						errChan <- err
 						s.logger.Error("failed to remove event from outbox",
 							zap.String("event_id", event.BasedEvent.EventId),
 							zap.Error(err))

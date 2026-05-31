@@ -21,9 +21,6 @@ func (s *StatusStorage) UpdateStatusSubs(ctx context.Context, key orderdomain.Ke
 		for {
 			select {
 			case <-ctx.Done():
-				for _, ch := range s.Subs[key] {
-					close(ch)
-				}
 				return
 
 			case <-ticker.C:

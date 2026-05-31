@@ -87,6 +87,7 @@ func (p *PostgresDB) AddOrderStorage(ctx context.Context, newOrder orderdomain.O
 	if err = tx.Commit(ctx); err != nil {
 		return "", "", err
 	}
+
 	return orderID, orderStatus, nil
 }
 
@@ -130,14 +131,14 @@ func (p *PostgresDB) AddOrderID(tx pgx.Tx, ctx context.Context, newOrder orderdo
 	//Check market cache
 	for _, m := range p.marketCache {
 		p.marketMu.RLock()
-		fmt.Println("CacheMarketID:", m.MarketId)
-		fmt.Println("UserAccess:", m.UserAccess)
-		fmt.Println("newOrder.UserRole:", newOrder.UserRole)
+
 		if m.MarketId == newOrder.MarketId && m.UserAccess == newOrder.UserRole {
 			foundMarket = true
+			p.marketMu.RUnlock()
 			break
 		}
 		p.marketMu.RUnlock()
+
 	}
 
 	if foundMarket != true {

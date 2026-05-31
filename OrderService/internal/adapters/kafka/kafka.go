@@ -3,7 +3,6 @@ package adapterkafka
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
 	orderconfig "github.com/DencCPU/gRPCServices/OrderService/config"
 	inboxdomain "github.com/DencCPU/gRPCServices/OrderService/internal/domain/inbox"
@@ -15,7 +14,6 @@ type KafkaBroker struct {
 }
 
 func NewKafkaBroker(cfg orderconfig.Kafka) *KafkaBroker {
-	fmt.Println(cfg)
 	broker := KafkaBroker{}
 	broker.reader = *kafka.NewReader(
 		kafka.ReaderConfig{
@@ -46,10 +44,8 @@ func (k *KafkaBroker) ReadMessage(ctx context.Context) (inboxdomain.KafkaMessage
 
 	err = json.Unmarshal(msg.Value, &kafkaMessage.Value)
 	if err != nil {
-
 		return inboxdomain.KafkaMessage{}, err
 	}
-
 	return kafkaMessage, nil
 }
 
@@ -59,4 +55,8 @@ func (k *KafkaBroker) Commit(ctx context.Context, msg inboxdomain.KafkaMessage) 
 		Partition: msg.Partition,
 		Offset:    msg.Offset,
 	})
+}
+
+func (k *KafkaBroker) Close() {
+	k.reader.Close()
 }

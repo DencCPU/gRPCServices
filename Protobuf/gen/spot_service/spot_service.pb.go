@@ -23,7 +23,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// Запрос для ViewMarket
+// ViewMarket Request
 type ViewMarketReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserRoles     common.UserRole        `protobuf:"varint,1,opt,name=user_roles,json=userRoles,proto3,enum=common.UserRole" json:"user_roles,omitempty"`
@@ -92,7 +92,7 @@ func (x *ViewMarketReq) GetPageToken() string {
 	return ""
 }
 
-// Ответ для ViewMarket
+// ViewMarket Response
 type ViewMarketResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	EnableMarkets []*Market              `protobuf:"bytes,1,rep,name=enable_markets,json=enableMarkets,proto3" json:"enable_markets,omitempty"`
@@ -211,10 +211,10 @@ const file_spot_service_spot_service_proto_rawDesc = "" +
 	"page_token\x18\x04 \x01(\tR\tpageToken\"x\n" +
 	"\x0eViewMarketResp\x12>\n" +
 	"\x0eenable_markets\x18\x01 \x03(\v2\x17.spot_service.v2.MarketR\renableMarkets\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"F\n" +
-	"\x06Market\x12\x1b\n" +
-	"\tmarket_id\x18\x01 \x01(\tR\bmarketId\x12\x1f\n" +
-	"\vmarket_name\x18\x02 \x01(\tR\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"Y\n" +
+	"\x06Market\x12%\n" +
+	"\tmarket_id\x18\x01 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\bmarketId\x12(\n" +
+	"\vmarket_name\x18\x02 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\n" +
 	"marketName2f\n" +
 	"\x15SpotInstrumentService\x12M\n" +
 	"\n" +

@@ -16,13 +16,15 @@ import (
 func (s *Client) GetEnableMarkets(ctx context.Context, userID string, userRole orderdomain.UserRole) ([]orderdomain.Market, error) {
 	//Creating a breaker shell over a query
 	result, err := s.breaker.Execute(func() (interface{}, error) {
+		childCtx, cancel := context.WithTimeout(ctx, s.ConnectionTimeout)
+		defer cancel()
 		req := spot.ViewMarketReq{
 			UserId:    userID,
 			UserRoles: common.UserRole(userRole),
 			PageSize:  0,
 		}
 		//Request to service
-		resp, err := s.ViewMarket(ctx, &req)
+		resp, err := s.ViewMarket(childCtx, &req)
 		if err != nil {
 			return nil, err
 		}

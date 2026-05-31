@@ -1,7 +1,8 @@
 package spotservice
 
 import (
-	orderconfig "github.com/DencCPU/gRPCServices/OrderService/config"
+	"time"
+
 	spot "github.com/DencCPU/gRPCServices/Protobuf/gen/spot_service"
 	"github.com/DencCPU/gRPCServices/SpotInstrumentService/pkg/spotclient"
 	"github.com/sony/gobreaker"
@@ -10,13 +11,14 @@ import (
 
 type Client struct {
 	spot.SpotInstrumentServiceClient
-	breaker *gobreaker.CircuitBreaker
+	breaker           *gobreaker.CircuitBreaker
+	ConnectionTimeout time.Duration
 }
 
-func NewClient(cfg orderconfig.BreakerSetting, logger *zap.Logger, breaker *gobreaker.CircuitBreaker) (*Client, error) {
+func NewClient(logger *zap.Logger, breaker *gobreaker.CircuitBreaker, connTimeout time.Duration) (*Client, error) {
 	client, err := spotclient.NewClient()
 	if err != nil {
 		return nil, err
 	}
-	return &Client{client, breaker}, nil
+	return &Client{client, breaker, connTimeout}, nil
 }

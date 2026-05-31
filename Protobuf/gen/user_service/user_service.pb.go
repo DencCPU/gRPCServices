@@ -7,14 +7,15 @@
 package user_service
 
 import (
+	reflect "reflect"
+	sync "sync"
+	unsafe "unsafe"
+
 	common "github.com/DencCPU/gRPCServices/Protobuf/gen/common"
 	_ "github.com/envoyproxy/protoc-gen-validate/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
-	reflect "reflect"
-	sync "sync"
-	unsafe "unsafe"
 )
 
 const (
@@ -24,6 +25,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Request RegistrationUser
 type RegistrationUserReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
@@ -84,6 +86,7 @@ func (x *RegistrationUserReq) GetPassword() string {
 	return ""
 }
 
+// Response RegistrationUser
 type RegistrationUserResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
@@ -144,6 +147,7 @@ func (x *RegistrationUserResp) GetExpireAt() *timestamppb.Timestamp {
 	return nil
 }
 
+// Request UpdateTokens
 type UpdateTokensReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
@@ -196,6 +200,7 @@ func (x *UpdateTokensReq) GetRefreshToken() string {
 	return ""
 }
 
+// Respone UpdateTokens
 type UpdateTokensResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
@@ -256,6 +261,7 @@ func (x *UpdateTokensResp) GetExpireAt() *timestamppb.Timestamp {
 	return nil
 }
 
+// Request Validation
 type ValidationReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
@@ -300,6 +306,7 @@ func (x *ValidationReq) GetAccessToken() string {
 	return ""
 }
 
+// Response Validation
 type ValidationResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -352,6 +359,7 @@ func (x *ValidationResp) GetRole() common.UserRole {
 	return common.UserRole(0)
 }
 
+// Request Authentication
 type AuthReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
@@ -404,6 +412,7 @@ func (x *AuthReq) GetPassword() string {
 	return ""
 }
 
+// Response Authentication
 type AuthResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`

@@ -307,7 +307,7 @@ func ServiceModule() fx.Option {
 		),
 		fx.Invoke(
 			func(lc fx.Lifecycle, cfg *spotconfig.Config, service *usecase.SpotService, logger *zap.Logger) {
-				errChan := make(chan error, 10)
+
 				var wg sync.WaitGroup
 				var cancel context.CancelFunc
 
@@ -316,30 +316,19 @@ func ServiceModule() fx.Option {
 						largeCtx, c := context.WithCancel(context.Background())
 						cancel = c
 
-						service.SendToBroker(largeCtx, &wg, cfg.Kafka.GetMarketsInterval, cfg.Kafka.RelayInterval, errChan)
-						wg.Add(1)
-						go func() {
-							defer wg.Done()
-							for err := range errChan {
-								if err != nil && err != context.Canceled {
-									logger.Error("kafka producer error:",
-										zap.Error(err),
-									)
-								}
-							}
-						}()
+						service.SendToBroker(largeCtx, &wg, cfg.Kafka.GetMarketsInterval, cfg.Kafka.RelayInterval)
 						return nil
 					},
 					OnStop: func(ctx context.Context) error {
 						if cancel != nil {
 							cancel()
+
 						}
 						done := make(chan struct{})
 
 						go func() {
 							wg.Wait()
 							close(done)
-							close(errChan)
 						}()
 
 						select {

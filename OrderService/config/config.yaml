@@ -3,6 +3,7 @@ server:
   host: 
   network: "tcp"
   request_per_second_limit: 100
+  client_connection_timeout: 5s
 
 postgres:
   host: 
@@ -37,4 +38,4 @@ kafka:
   group_id: "order-service-group"
   min_bytes: 1
   max_bytes: 1048576
-  max_wait: 10s
+  max_wait: 2s

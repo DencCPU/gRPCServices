@@ -14,9 +14,11 @@ import (
 
 func (c *Client) UpdateAccessToken(ctx context.Context, accessToken, refreshToken string) (tokens.PairToken, error) {
 	result, err := c.breaker.Execute(func() (interface{}, error) {
+		childCtx, cancel := context.WithTimeout(ctx, c.ConnectionTimeout)
+		defer cancel()
 		req := user.UpdateTokensReq{AccessToken: accessToken, RefreshToken: refreshToken}
 
-		resp, err := c.UpdateTokens(ctx, &req)
+		resp, err := c.UpdateTokens(childCtx, &req)
 		if err != nil {
 			return tokens.PairToken{}, err
 		}

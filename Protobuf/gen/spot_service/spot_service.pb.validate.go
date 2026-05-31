@@ -334,12 +334,39 @@ func (m *Market) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for MarketId
+	if err := m._validateUuid(m.GetMarketId()); err != nil {
+		err = MarketValidationError{
+			field:  "MarketId",
+			reason: "value must be a valid UUID",
+			cause:  err,
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
-	// no validation rules for MarketName
+	if utf8.RuneCountInString(m.GetMarketName()) < 1 {
+		err := MarketValidationError{
+			field:  "MarketName",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return MarketMultiError(errors)
+	}
+
+	return nil
+}
+
+func (m *Market) _validateUuid(uuid string) error {
+	if matched := _spot_service_uuidPattern.MatchString(uuid); !matched {
+		return errors.New("invalid uuid format")
 	}
 
 	return nil

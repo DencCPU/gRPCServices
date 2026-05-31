@@ -17,6 +17,17 @@ exporters:
     tls:
       insecure: true
 
+#Подключение буффера
+    sending_queue:
+      enabled: true #Подключение очереди сообщений(буфер)
+      queue_size: 1000 #Размер очереди в пачках
+
+#Повторная отправка сообщений
+    retry_on_failure:
+      enabled: true 
+      initial_interval: 5s   #Начальный интервал попытки повторной передачи
+      max_interval: 30s      #Максимальный интервал
+      max_elapsed_time: 300s #Максимаьлное время попытки отправить данные 
   
   prometheus:
     endpoint: 0.0.0.0:8889
@@ -26,11 +37,27 @@ exporters:
     endpoint: tempo:4317
     tls:
       insecure: true
+    sending_queue:
+      enabled: true 
+      queue_size: 1000 
+    retry_on_failure:
+      enabled: true 
+      initial_interval: 5s   
+      max_interval: 30s      
+      max_elapsed_time: 300s 
 
   otlphttp/loki:                                  
-    endpoint: "http://loki:3100/otlp" # Обратите внимание: путь изменился на /otlp
+    endpoint: "http://loki:3100/otlp" 
     tls:
       insecure: true
+    sending_queue:
+      enabled: true 
+      queue_size: 1000 
+    retry_on_failure:
+      enabled: true 
+      initial_interval: 5s   
+      max_interval: 30s      
+      max_elapsed_time: 300s 
 
   debug:
     verbosity: detailed

@@ -31,6 +31,7 @@ func (c *Client) CreateNewOrder(ctx context.Context, order orderdomain.OrderInfo
 		order.Price,
 		order.Quantity,
 	)
+
 	hash := sha256.Sum256([]byte(data))
 
 	indempotencyKey := hex.EncodeToString(hash[:])
@@ -39,6 +40,8 @@ func (c *Client) CreateNewOrder(ctx context.Context, order orderdomain.OrderInfo
 	nanos := d.Sub(decimal.NewFromInt(uints)).Shift(9).IntPart()
 
 	result, err := c.breaker.Execute(func() (interface{}, error) {
+		childCtx, cancel := context.WithTimeout(ctx, c.ConnectionTimeout)
+		defer cancel()
 		req := order_service.CreateOrderReq{
 			UserId:   order.UserId,
 			MarketId: order.MarketId,
@@ -51,6 +54,7 @@ func (c *Client) CreateNewOrder(ctx context.Context, order orderdomain.OrderInfo
 			UserRole:        common.UserRole(order.UserRole),
 			IndempotencyKey: indempotencyKey,
 		}
+
 		switch order.OrderType {
 		case "normal":
 			req.OrderType = order_service.OrderType_ORDER_TYPE_NORMAL
@@ -60,7 +64,7 @@ func (c *Client) CreateNewOrder(ctx context.Context, order orderdomain.OrderInfo
 			return orderdto.Output{}, errors.New("incorrect oreder type")
 		}
 
-		resp, err := c.CreateOrder(ctx, &req)
+		resp, err := c.CreateOrder(childCtx, &req)
 		if err != nil {
 			return orderdto.Output{}, err
 		}

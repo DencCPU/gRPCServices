@@ -9,20 +9,52 @@ import "validate/validate.proto";
 
 option go_package = "github.com/DenсCPU/gRPCServices/Protobuf/gen/order_service";
 
-//Сервис управления заказами
 service OrderService {
-  rpc GetOrderStatus(GetOrderReq) returns (GetOrderResp); //Получение информации о заказе
-  rpc CreateOrder(CreateOrderReq) returns (CreateOrderResp); //Создание заказа
+  /*
+     The GetOrderStatus method retrieves information about a user's order.
+     The request body contains the order number (order_id) and user number (user_id).
+     The method returns a response with the following fields:
+      -order_status,
+      -order_id,
+      -order coas(price),
+      -number of order units (quantity),
+      -the title of the market in which the order was made( market_name).
+  */
+  rpc GetOrderStatus(GetOrderReq) returns (GetOrderResp);
+
+  /*
+     The CreateOrder method is responsible for creating an order by the user.
+     The request body contains information about:
+      -user_id,
+      -market_id,
+      -order_type,
+      -order coas(price),
+      -number of order units (quantity),
+      -user_role,
+      -idempotency key to prevent duplicate orders.
+     The method returns a response with the following fields:
+      -order_id,
+      -order_status.
+  */
+  rpc CreateOrder(CreateOrderReq) returns (CreateOrderResp);
+
+  /*
+     The StreamOrderUpdate method is responsible for receiving up-to-date information about changes in the order status.
+     The request body contains information about order_id and user_id.
+     The method returns a response with the following fields:
+      -order_status,
+      -update_status_time.
+  */
   rpc StreamOrderUpdate(StreamOrderUpdateReq) returns (stream StreamOrderUpdateResp); //Получение актульного статуса заказа
 }
 
-//Запрос для GetOrderStatus
+//Request for GetOrderStatus
 message GetOrderReq {
   string order_id = 1 [(validate.rules).string.uuid = true];
   string user_id = 2 [(validate.rules).string.uuid = true];
 }
 
-//Ответ для GetOrderStatus
+//Response for GetOrderStatus
 message GetOrderResp {
   string order_status = 1;
   string order_id = 2;
@@ -31,7 +63,7 @@ message GetOrderResp {
   string market_name = 5;
 }
 
-//Запрос для CreateOrder
+//Request for CreateOrder
 message CreateOrderReq {
   string user_id = 1 [(validate.rules).string.uuid = true];
   string market_id = 2 [(validate.rules).string.uuid = true];
@@ -48,17 +80,19 @@ enum OrderType {
   ORDER_TYPE_EXPRESS = 2;
 }
 
-//Ответ для CreateOrder
+//Response for CreateOrder
 message CreateOrderResp {
   string order_id = 1;
   string order_status = 2;
 }
 
+//Request for StreamOrderUpdate
 message StreamOrderUpdateReq {
   string order_id = 1 [(validate.rules).string.uuid = true];
   string user_id = 2 [(validate.rules).string.uuid = true];
 }
 
+//Response for StreamOrderUpdate
 message StreamOrderUpdateResp {
   string order_status = 1;
   google.protobuf.Timestamp update_status_time = 2;

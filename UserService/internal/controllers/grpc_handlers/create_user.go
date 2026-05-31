@@ -9,7 +9,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (h *Handler) CreateUser(ctx context.Context, req *user.RegistrationUserReq) (*user.RegistrationUserResp, error) {
+func (h *Handler) RegistrationNewUser(ctx context.Context, req *user.RegistrationUserReq) (*user.RegistrationUserResp, error) {
 
 	err := req.Validate()
 	if err != nil {
@@ -24,6 +24,9 @@ func (h *Handler) CreateUser(ctx context.Context, req *user.RegistrationUserReq)
 	}
 
 	pairToken, err := h.Service.CreateUser(ctx, newUser)
+	if err != nil {
+		return nil, err
+	}
 
 	resp := &user.RegistrationUserResp{
 		AccessToken:  pairToken.AccessToken,

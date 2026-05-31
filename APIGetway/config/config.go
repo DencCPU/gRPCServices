@@ -9,9 +9,12 @@ type Config struct {
 }
 
 type Server struct {
-	Port    int    `mapstructure:"port"`
-	Host    string `mapstructure:"host"`
-	Network string `mapstructure:"network"`
+	Port                    int           `mapstructure:"port"`
+	Host                    string        `mapstructure:"host"`
+	Network                 string        `mapstructure:"network"`
+	WriteTimeout            time.Duration `mapstructure:"write_timeout"`
+	ClientConnectionTimeout time.Duration `mapstructure:"client_connection_timeout"`
+	RequestPerSecondLimit   uint          `mapstructure:"request_per_second_limit"`
 }
 
 type BreakerSetting struct {

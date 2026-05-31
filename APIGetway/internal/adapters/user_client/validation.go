@@ -15,8 +15,12 @@ import (
 
 func (c *Client) Validation(ctx context.Context, accessToken string) (userservicedto.Output, error) {
 	result, err := c.breaker.Execute(func() (interface{}, error) {
+		childCtx, cancel := context.WithTimeout(ctx, c.ConnectionTimeout)
+		defer cancel()
+
 		req := user.ValidationReq{AccessToken: accessToken}
-		resp, err := c.ValidationTokens(ctx, &req)
+
+		resp, err := c.ValidationTokens(childCtx, &req)
 		if err != nil {
 			return userservicedto.Output{}, err
 		}

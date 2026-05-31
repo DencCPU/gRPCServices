@@ -15,6 +15,8 @@ import (
 
 func (c *Client) ViewEnableMarkets(ctx context.Context, input spotservicedto.Input) ([]spotservicedto.Output, error) {
 	result, err := c.breaker.Execute(func() (interface{}, error) {
+		childCtx, cancel := context.WithTimeout(ctx, c.ConnectionTimeout)
+		defer cancel()
 		req := spot_service.ViewMarketReq{
 			UserId:    input.UserID,
 			PageSize:  int32(input.PageSize),
@@ -30,10 +32,11 @@ func (c *Client) ViewEnableMarkets(ctx context.Context, input spotservicedto.Inp
 			return nil, errors.New("unknow role")
 		}
 
-		resp, err := c.ViewMarket(ctx, &req)
+		resp, err := c.ViewMarket(childCtx, &req)
 		if err != nil {
 			return nil, err
 		}
+
 		return resp, nil
 	})
 

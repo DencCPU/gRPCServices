@@ -9,49 +9,99 @@ import "validate/validate.proto";
 option go_package = "github.com/DencCPU/gRPCServices/Protobuf/gen/user_service";
 
 service UserService {
+  /*
+     The RegistrationNewUser method is responsible for registering a new user in the system.
+     The request body contains information about:
+      -user name (name),
+      -user email address (email),
+      -user account password (password).
+     The method returns a response with the following fields:
+      -access_token (JWT token for API authentication),
+      -refresh_token (token for obtaining a new access token),
+      -expire_at (access token expiration timestamp).
+  */
   rpc RegistrationNewUser(RegistrationUserReq) returns (RegistrationUserResp);
+
+  /*
+     The UpdateTokens method is responsible for refreshing both access and refresh token pair.
+     The request body contains information about:
+       -current access_token (access_token),
+       -current refresh_token (refresh_token).
+     The method returns a response with the following fields:
+       -new access_token (access_token),
+       -new refresh_token (refresh_token),
+       -new access_token expiration timestamp (expire_at).
+  */
   rpc UpdateTokens(UpdateTokensReq) returns (UpdateTokensResp);
+
+  /*
+     The ValidationTokens method is responsible for validating the access_token.
+     The request body contains information about:
+      -access_token (access_token).
+     The method returns a response with the following fields:
+      -user_id (user_id),
+      -user_role (role), extracted from the valid token.
+  */
   rpc ValidationTokens(ValidationReq) returns (ValidationResp);
+
+  /*
+     The Authentication method is responsible for authenticating a user in the system.
+     The request body contains information about:
+      -user email address (email),
+      -user account password (password).
+     The method returns a response with the following fields:
+      -access_token (JWT token for API authentication),
+      -refresh_token (token for obtaining a new access token),
+      -expire_at (access token expiration timestamp).
+  */
   rpc Authentication(AuthReq) returns (AuthResp);
 }
 
+//Request RegistrationUser
 message RegistrationUserReq {
   string name = 1 [(validate.rules).string.min_len = 2];
   string email = 2 [(validate.rules).string.email = true];
   string password = 3 [(validate.rules).string.min_len = 8];
 }
 
+//Response RegistrationUser
 message RegistrationUserResp {
   string access_token = 1;
   string refresh_token = 2;
   google.protobuf.Timestamp expire_at = 3;
 }
 
+//Request UpdateTokens
 message UpdateTokensReq {
   string access_token = 1 [(validate.rules).string.min_len = 1];
   string refresh_token = 2 [(validate.rules).string.uuid = true];
 }
 
+//Respone UpdateTokens
 message UpdateTokensResp {
   string access_token = 1;
   string refresh_token = 2;
   google.protobuf.Timestamp expire_at = 3;
 }
 
+//Request Validation
 message ValidationReq {
   string access_token = 1 [(validate.rules).string.min_len = 1];
 }
 
+//Response Validation
 message ValidationResp {
   string user_id = 1;
   common.UserRole role = 2;
 }
 
+//Request Authentication
 message AuthReq {
   string email = 1 [(validate.rules).string.email = true];
   string password = 2 [(validate.rules).string.min_len = 8];
 }
 
+//Response Authentication
 message AuthResp {
   string access_token = 1;
   string refresh_token = 2;

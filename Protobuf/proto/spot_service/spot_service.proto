@@ -7,12 +7,25 @@ import "validate/validate.proto";
 
 option go_package = "github.com/DenсCPU/gRPCServices/Protobuf/gen/spot_service";
 
-//Предоставления данных о рынках
 service SpotInstrumentService {
+  /*
+       The ViewMarket is designed to obtain a list of available markets for a specific user.
+       The request body contains information about:
+        -user_roles,
+        -user_id,
+        -page_size,
+        -page_token.
+      The page_size field is responsible for the number of elements on one page.
+      The method returns a response with the following fields:
+        -list of available markets (enable_markets),
+        -next_page_token.
+     next_page_token is a token that marks the last market in the resulting list.
+     When regenerating, market browsing will begin with the market corresponding to this token.
+  */
   rpc ViewMarket(ViewMarketReq) returns (ViewMarketResp);
 }
 
-//Запрос для ViewMarket
+//ViewMarket Request
 message ViewMarketReq {
   common.UserRole user_roles = 1;
   string user_id = 2 [(validate.rules).string.uuid = true];
@@ -23,13 +36,13 @@ message ViewMarketReq {
   string page_token = 4;
 }
 
-//Ответ для ViewMarket
+//ViewMarket Response
 message ViewMarketResp {
   repeated Market enable_markets = 1;
   string next_page_token = 2;
 }
 
 message Market {
-  string market_id = 1;
-  string market_name = 2;
+  string market_id = 1 [(validate.rules).string.uuid = true];
+  string market_name = 2 [(validate.rules).string.min_len = 1];
 }

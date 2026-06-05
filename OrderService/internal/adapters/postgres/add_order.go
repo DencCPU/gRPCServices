@@ -142,6 +142,9 @@ func (p *PostgresDB) AddOrderID(tx pgx.Tx, ctx context.Context, newOrder orderdo
 	}
 
 	if foundMarket != true {
+		p.marketMu.RLock()
+		fmt.Println(p.marketCache)
+		p.marketMu.RUnlock()
 		return 0, "", ordererrors.Avalible_markets
 	}
 

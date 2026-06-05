@@ -76,6 +76,7 @@ func (p *PostgresDB) processOrder(orderInfo orderdomain.OrderInfo) error {
 		if err != nil {
 			return err
 		}
+		fmt.Println("ORDER STATUS:", status)
 		statusChan <- status
 
 		status = orderdomain.StatusComplited
@@ -83,6 +84,7 @@ func (p *PostgresDB) processOrder(orderInfo orderdomain.OrderInfo) error {
 		if err != nil {
 			return err
 		}
+		fmt.Println("ORDER STATUS:", status)
 		statusChan <- status
 
 	case orderdomain.ORDER_TYPE_EXPRESS:

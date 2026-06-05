@@ -22,5 +22,4 @@ func (s *StatusStorage) Unsubscribe(key orderdomain.Key, ch chan string) {
 			break
 		}
 	}
-	close(ch)
 }

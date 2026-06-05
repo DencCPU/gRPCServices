@@ -2,6 +2,7 @@ package orderclient
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 
@@ -30,7 +31,7 @@ func (c *Client) GetStreamStatus(ctx context.Context, input orderdto.GetInput, m
 			resp, err := stream.Recv()
 
 			if err != nil {
-				if err == io.EOF {
+				if errors.Is(err, io.EOF) {
 					return nil
 				}
 				if status.Code(err) == codes.Canceled {

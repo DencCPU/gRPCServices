@@ -15,6 +15,7 @@ type KafkaBroker struct {
 
 func NewKafkaBroker(cfg orderconfig.Kafka) *KafkaBroker {
 	broker := KafkaBroker{}
+
 	broker.reader = *kafka.NewReader(
 		kafka.ReaderConfig{
 			Brokers:        cfg.Brokers,

@@ -32,6 +32,7 @@ func (i *Inbox) Add(msg inboxdomain.KafkaMessage) []orderdomain.Market {
 			MarketName: market.MarketName,
 			UserAccess: market.UserAccess,
 		}
+
 		markets = append(markets, m)
 	}
 	return markets
@@ -39,9 +40,9 @@ func (i *Inbox) Add(msg inboxdomain.KafkaMessage) []orderdomain.Market {
 
 func (i *Inbox) CheckEvent(eventId string) bool {
 	i.mu.RLock()
+	defer i.mu.RUnlock()
 	if _, exist := i.cacheEvent[eventId]; exist {
 		return true
 	}
-	i.mu.RUnlock()
 	return false
 }

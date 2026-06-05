@@ -110,12 +110,12 @@ func (p *PostgresDB) CheckUser(ctx context.Context, email string) bool {
 	var exist bool
 	err := p.QueryRow(ctx, `
 	SELECT EXISTS
-	(SELECT 1 
+	(SELECT * 
 	FROM users 
 	WHERE email = $1)
 	`, email).Scan(&exist)
 	if err != nil {
 		return false
 	}
-	return true
+	return exist
 }

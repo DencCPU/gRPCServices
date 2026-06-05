@@ -1,8 +1,6 @@
 package memory
 
 import (
-	"fmt"
-
 	domainmarket "github.com/DencCPU/gRPCServices/SpotInstrumentService/internal/domain/market"
 	domainusers "github.com/DencCPU/gRPCServices/SpotInstrumentService/internal/domain/users"
 )
@@ -20,31 +18,27 @@ func (s *Storage) GetEnableMarkets(input domainusers.Input) ([]*domainmarket.Mar
 	var (
 		enableMarkets []*domainmarket.Market
 		pageToken     string
-		i             int
 	)
-
-	fmt.Println("USERROLE:", input.UserRole)
 
 	if input.PageToken == "" {
 
 		switch input.UserRole {
 		case domainusers.USER_ROLE_PREMIUM_USER:
-			fmt.Println("PREMIUM ROLE")
-			for i = 0; i < size; i++ {
+			for i := 0; i < len(s.date) && size > 0; i++ {
 				s.mu.RLock()
 				if s.date[i].DeleteAt == nil || s.date[i].Enable == true {
-					fmt.Println("USERACCESS:", s.date[i].UserAccess)
 					enableMarkets = append(enableMarkets, s.date[i])
+					size--
 				}
 				s.mu.RUnlock()
 			}
+
 		case domainusers.USER_ROLE_BASIC_USER:
-			fmt.Println("BASIC ROLE")
-			for i = 0; i < size; i++ {
+			for i := 0; i < len(s.date) && size > 0; i++ {
 				s.mu.RLock()
 				if (s.date[i].DeleteAt == nil || s.date[i].Enable == true) && input.UserRole == s.date[i].UserAccess {
-					fmt.Println("USERACCESS:", s.date[i].UserAccess)
 					enableMarkets = append(enableMarkets, s.date[i])
+					size--
 				}
 				s.mu.RUnlock()
 			}
@@ -52,36 +46,49 @@ func (s *Storage) GetEnableMarkets(input domainusers.Input) ([]*domainmarket.Mar
 
 	} else {
 
-		for s.date[i].ID != input.PageToken {
-			i++
+		startIdx := -1
+		for i := 0; i < len(s.date); i++ {
+			s.mu.RLock()
+			if s.date[i].ID == input.PageToken {
+				startIdx = i + 1
+				s.mu.RUnlock()
+				break
+			}
+			s.mu.RUnlock()
 		}
-		i++
+
+		if startIdx == -1 {
+			return nil, ""
+		}
+
+		remaining := size
 
 		switch input.UserRole {
 		case domainusers.USER_ROLE_PREMIUM_USER:
-			for input.PageSize != 0 && i < len(s.date) {
+			for i := startIdx; remaining > 0 && i < len(s.date); i++ {
 				s.mu.RLock()
 				if s.date[i].DeleteAt == nil || s.date[i].Enable == true {
-					fmt.Println("USERACCESS:", s.date[i].UserAccess)
 					enableMarkets = append(enableMarkets, s.date[i])
+					remaining--
 				}
-				input.PageSize--
 				s.mu.RUnlock()
 			}
+
 		case domainusers.USER_ROLE_BASIC_USER:
-			for input.PageSize != 0 && i < len(s.date) {
+			for i := startIdx; remaining > 0 && i < len(s.date); i++ {
 				s.mu.RLock()
-				fmt.Println("USERACCESS:", s.date[i].UserAccess)
 				if (s.date[i].DeleteAt == nil || s.date[i].Enable == true) && s.date[i].UserAccess == input.UserRole {
 					enableMarkets = append(enableMarkets, s.date[i])
+					remaining--
 				}
-				input.PageSize--
 				s.mu.RUnlock()
 			}
 		}
-
+	}
+	if len(enableMarkets) > 0 {
+		lastMarket := enableMarkets[len(enableMarkets)-1]
+		pageToken = lastMarket.ID
 	}
 
-	pageToken = s.date[i-1].ID
 	return enableMarkets, pageToken
 }
